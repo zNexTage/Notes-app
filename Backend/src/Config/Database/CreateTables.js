@@ -16,8 +16,18 @@ const TbNotes = dedent(`CREATE TABLE IF NOT EXISTS TB_NOTES (
     title VARCHAR(50) NOT NULL,
     content TEXT NOT NULL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
-)`);
+);
+`);
 
+const TbUserNotes = dedent(`
+    CREATE TABLE IF NOT EXISTS TB_USERS_NOTES(
+        id_user_note INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+        id_user INT,
+        id_note INT,
+        CONSTRAINT fk_user FOREIGN KEY (id_user) REFERENCES tb_users (id_user),
+        CONSTRAINT fk_note FOREIGN KEY (id_note) REFERENCES tb_notes (id_note)
+    );
+`);
 
 const createUserTable = () => {
     return new Promise((resolve, reject) => {
@@ -49,11 +59,29 @@ const createNotesTables = () => {
     })
 }
 
+const createUserNotes = ()=>{
+    return new Promise((resolve, reject) => {
+        communication.query(TbUserNotes, (err, queryResult) => {
+            if (err) {
+                console.error("Error onCreateUsersNotesTable", err);
+
+                reject(err);
+            }
+
+            console.log("Users/Notes table created!", queryResult);
+            resolve(queryResult);
+        })
+    })
+}
+
 const CreateTables = () => {
     communication.connect();
 
-    Promise.all([createUserTable(),
-    createNotesTables()])
+    Promise.all([
+        createUserTable(),
+        createNotesTables(),
+        createUserNotes()
+    ])
         .finally(() => {
             communication.end();
         })
