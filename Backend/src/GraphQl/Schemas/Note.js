@@ -3,7 +3,7 @@ const Note = `
         id:Int
         title:String
         content:String
-        dateCriation:Date
+        createdAt:Date
         user:User
     }
 
