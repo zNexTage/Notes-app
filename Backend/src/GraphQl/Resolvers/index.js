@@ -1,7 +1,9 @@
 const UserResolver = require('./User.resolver');
+const NoteResolver = require('./Note.resolver');
 
 const Resolvers = [
-    UserResolver
+    UserResolver,
+    NoteResolver
 ];
 
 module.exports = Resolvers;

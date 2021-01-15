@@ -5,7 +5,8 @@ const TbUser = dedent(`CREATE TABLE IF NOT EXISTS TB_USERS (
     id_user INT PRIMARY KEY NOT NULL AUTO_INCREMENT, 
     name VARCHAR(50) NOT NULL,
     lastname VARCHAR(50) NOT NULL,
-    password VARCHAR(50) NOT NULL,
+    username VARCHAR(20) NOT NULL,
+    password TEXT NOT NULL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP,
     picture TEXT);
