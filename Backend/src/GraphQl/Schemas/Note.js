@@ -10,6 +10,7 @@ const Note = `
     input NewNote {
         title:String!
         content:String!
+        idUser:Int!
     }
 `;
 

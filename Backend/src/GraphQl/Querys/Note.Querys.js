@@ -1,4 +1,6 @@
-const NoteQuery = `
-    NotesByUser(idUser:Int!):[Notes]
+const NotesQuery = `
+    NotesByUser(idUser:Int!):[Note]
     GetNote(idNote:Int!):Note
 `;
+
+module.exports = NotesQuery;
