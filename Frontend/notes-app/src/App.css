@@ -1,0 +1,36 @@
+
+div{
+  display: flex;
+  flex-direction: column;
+}
+
+input{
+  height: 40px;
+  font-size: 25px;
+  border-radius: 5px;
+  border: 1px solid;  
+  font-family: YuseiMagic;
+}
+
+.login-container{
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--primary-color);  
+}
+
+.login-content{
+  box-shadow:3px 3px var(--tertiary-color);  
+  width: 40%;
+  border-radius: 20px;
+  box-sizing: content-box;
+  border: 1px solid var(--secondary-color);
+  padding: 20px;  
+  background-color: var(--secondary-color);
+}
+
+label{
+  color: white;
+  font-family: YuseiMagic;
+}
+
