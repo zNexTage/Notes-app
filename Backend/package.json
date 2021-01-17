@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./src/App.js",
+    "start": "nodemon ./src/App.js",
     "create-tables": "node ./src/Config/Database/CreateTables.js",
-    "run-seed":"node ./src/Config/Database/Seed.js"
+    "run-seed": "node ./src/Config/Database/Seed.js"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +18,7 @@
     "dedent-js": "^1.0.1",
     "dotenv": "^8.2.0",
     "graphql": "^15.4.0",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.7"
   }
 }
