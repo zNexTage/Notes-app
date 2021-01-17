@@ -1,71 +1,74 @@
-const connection = require("../Config/Database/Database");
+const database = require('../Config/Database/Database');
 
-const NoteDao = {
+class NoteDao {
     insertNote(title, content) {
         return new Promise((resolve, reject) => {
-            try {
-                if (connection.state == "disconnected") {
-                    connection.connect();
+            database.getConnection((err, connection) => {
+                if (err) {
+                    console.log("Connection error", err);
+
+                    reject({
+                        error: "Não foi possível se conectar com o banco de dados",
+                        queryResult: {}
+                    });
+
+                    return;
                 }
 
-                const query = "INSERT INTO tb_notes (title, content) VALUES (?)";
+                const query = "INSERT INTO TB_NOTES (title, content) VALUES (?, ?)";
 
-                const params = [title, content];
+                connection.query(query, [title, content], (err, result) => {
+                    connection.release();
 
-                connection.query(query, [params], (err, queryResult, fields) => {
                     if (err) {
-                        reject({ error: err, queryResult });
+                        console.log("Query error", err);
+
+                        reject({
+                            error: "Ocorreu um erro ao inserir a nota!",
+                            queryResult: {}
+                        });
+
                         return;
                     }
 
-                    this.noteById(queryResult.insertId).then((res) => {
-                        if (res.error) {
-                            reject({ error: err, queryResult });
-                            return;
-                        }
-
-                        resolve(res);
+                    resolve({
+                        error: {},
+                        queryResult: result
                     });
-                });
-            } catch (error) {
-                throw error;
-            }
-            finally {
-                if (connection.state == "connected") {
-                    connection.end();
-                }
-            }
+                })
+            })
         });
-    },
+    }
+
     noteById(idNote) {
         return new Promise((resolve, reject) => {
-            try {
-                if (connection.state == "disconnected") {
-                    connection.connect();
+            database.getConnection((err, connection) => {
+                if (err) {
+                    console.log("Connection error", err);
+
+                    reject({
+                        error: "Não foi possível se conectar com o banco de dados",
+                        queryResult: {}
+                    });
+
+                    return;
                 }
 
-                const query = "SELECT * FROM tb_notes WHERE id_note = ?";
+                const query = "SELECT * FROM TB_NOTES WHERE id_note = ?";
 
-                connection.query(query, [idNote], (err, queryResult) => {
-                    const note = queryResult[0];
-
-                    console.log(note);
-
+                connection.query(query, [idNote], (err, results) => {
                     if (err) {
-                        reject({ error: err, queryResult: note });
-                    }
+                        reject({
+                            error: "Não foi possível obter a nota",
+                            queryResult: {}
+                        });
 
-                    resolve({ queryResult: note });
+                        return;
+                    } 
+
+                    resolve({ error: {}, queryResult: results[0] });
                 });
-            }
-            catch (err) {
-                reject({ error: err, queryResult: {} });
-            }
-            finally {
-                if (connection.state == "connected") {
-                    connection.end();
-                }
-            }
+            })
         })
     }
 

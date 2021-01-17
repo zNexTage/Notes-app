@@ -15,7 +15,7 @@ const User = `
         lastname:String!
         username:String!
         password:String!
-    }
+    } 
 `;
 
 module.exports = User;

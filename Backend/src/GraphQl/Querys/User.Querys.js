@@ -1,6 +1,3 @@
-const UserQuery = `
-    AllUsers:[User]
-    GetUser(id:Int!):User
-`;
+const UserQuery = ``;
 
 module.exports = UserQuery;

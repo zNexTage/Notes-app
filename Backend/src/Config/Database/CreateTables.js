@@ -25,8 +25,8 @@ const TbUserNotes = dedent(`
         id_user_note INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
         id_user INT,
         id_note INT,
-        CONSTRAINT fk_user FOREIGN KEY (id_user) REFERENCES tb_users (id_user),
-        CONSTRAINT fk_note FOREIGN KEY (id_note) REFERENCES tb_notes (id_note)
+        CONSTRAINT fk_user FOREIGN KEY (id_user) REFERENCES TB_USERS (id_user),
+        CONSTRAINT fk_note FOREIGN KEY (id_note) REFERENCES TB_NOTES (id_note)
     );
 `);
 
@@ -37,6 +37,8 @@ const createUserTable = () => {
                 console.error("Error onCreateUserTable", err);
 
                 reject(err);
+
+                return;
             }
 
             console.log("Users table created!", queryResult);
@@ -52,6 +54,8 @@ const createNotesTables = () => {
                 console.error("Error onCreateNotesTable", err);
 
                 reject(err);
+
+                return;
             }
 
             console.log("Notes table created!", queryResult);
@@ -67,6 +71,8 @@ const createUserNotes = ()=>{
                 console.error("Error onCreateUsersNotesTable", err);
 
                 reject(err);
+
+                return;
             }
 
             console.log("Users/Notes table created!", queryResult);

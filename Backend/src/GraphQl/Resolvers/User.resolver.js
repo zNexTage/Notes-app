@@ -1,30 +1,24 @@
-const users = [
-    {
-        id: 1,
-        name:"Majiko",
-        lastname:"Majakoja"
-    },
-    {
-        id:2,
-        name:"Ayanami",
-        lastname:'Rei'
-    },
-    {
-        id:3,
-        name:"Asuka",
-        lastname:"Langley"
-    }
-];
+const UserBll = require("../../../BLL/User.Bll");
+const UserDao = require("../../DAO/User.Dao");
 
 const UserResolver = {
-    Query:{
-        AllUsers:()=>{
-            return users;
-        },
-        GetUser:(_, {id})=>{
-            const user = users.filter((u)=> u.id == id);
+    Mutation: {
+        async Login(_, { username, password }) {
+            try {
+                const userBll = new UserBll();
 
-            return user;
+                const user = await userBll.logIn(username, password); 
+
+                return user;
+            }
+            catch (err) {
+                throw err;
+            }
+        }
+    },
+    User: {
+        id({ id_user }) {
+            return id_user;
         }
     }
 }

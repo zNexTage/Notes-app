@@ -1,4 +1,4 @@
-const NoteDao = require("../../DAO/Note.Dao");
+const NoteBll = require("../../../BLL/Note.Bll"); 
 
 const NoteResolver = {
     Query: {
@@ -16,15 +16,13 @@ const NoteResolver = {
             try {
                 const { title, content } = newNote;
 
-                const { error, queryResult } = await NoteDao.insertNote(title, content);
+                const noteBll = new NoteBll();
 
-                if(error){
-                    throw error;
-                }
+                const note = await noteBll.insertANote(title, content); 
 
-                return queryResult;
+                return note;
             } catch (error) {
-                throw new Error("Não foi possível realizar a inserção da nota!")
+                throw error;
             }
         }
     }

@@ -44,7 +44,7 @@ const run = () => {
     try{
         connection.connect();   
         
-        let query = 'INSERT INTO tb_users (name, lastname, username, password, picture) VALUES ?';
+        let query = 'INSERT INTO TB_USERS (name, lastname, username, password, picture) VALUES ?';
 
         connection.query(query, [usersWithHashPass], (err, result)=>{
             if(err){
