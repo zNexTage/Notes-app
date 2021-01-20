@@ -2,35 +2,57 @@
 div{
   display: flex;
   flex-direction: column;
+  font-family: YuseiMagic;
+} 
+
+.login-header{
+  flex-direction: row;
+  justify-content: space-between;
+  color: white;
 }
 
-input{
-  height: 40px;
-  font-size: 25px;
-  border-radius: 5px;
-  border: 1px solid;  
-  font-family: YuseiMagic;
+.container-background{
+  background-color: var(--primary-color);  
 }
 
 .login-container{
   height: 100vh;
   justify-content: center;
   align-items: center;
-  background-color: var(--primary-color);  
+  flex-direction: row;
 }
 
 .login-content{
-  box-shadow:3px 3px var(--tertiary-color);  
+  box-shadow: 3px 3px var(--tertiary-color);
   width: 40%;
   border-radius: 20px;
   box-sizing: content-box;
   border: 1px solid var(--secondary-color);
-  padding: 20px;  
+  padding: 20px;
   background-color: var(--secondary-color);
+  height: auto;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+@media only screen and (max-width: 850px) {
+  .login-content {
+    width: 100%;
+    margin: 0 15px;
+  }
+
+  #lottie-animation{
+    display: none;
+  }
 }
 
 label{
   color: white;
-  font-family: YuseiMagic;
 }
 
+.login-buttons{
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+}
