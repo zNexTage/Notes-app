@@ -1,0 +1,18 @@
+input{
+    height: 60px;
+    font-size: 30px;
+    border-radius: 5px;
+    border: 1px solid;  
+    font-family: YuseiMagic;
+    background-color: #F87AD6;
+    color: white;
+    border: none; 
+  }
+
+  input::placeholder{
+      color: white;
+  }
+
+  input:focus{
+      outline: none;
+  }
