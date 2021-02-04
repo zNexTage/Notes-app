@@ -1,0 +1,36 @@
+.profile-notes-container{
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+}
+
+.user-profile-info{
+    width: 20%;
+    height: 100%;
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.user-profile-info > div:first-child {
+    margin-top: 20px;
+}
+
+.user-profile-info img{
+    object-fit: cover;
+}
+
+.create-notes-container{
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    flex: 1;
+}
+
+.create-notes-container > button:first-child > div { 
+    position: absolute;
+}
+
+.notes-container{
+    width: 100%;
+}
