@@ -1,19 +1,27 @@
+import { type } from "os";
 import "./style.css";
 
 type Props = {
-    title: string
+    title: string | JSX.Element
     color: string
     textColor?: string
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onMouseOver?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onMouseOut?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-function Button({ title, color, textColor, onClick }: Props) {
+function Button({ title, color, textColor, onClick, onMouseOver, onMouseOut }: Props) {
+    const isTitleString = typeof title === "string";
 
     return (
-        <button onClick={onClick} className="btn" style={{ backgroundColor: color, color: textColor ? textColor : "white" }}>
-            <label>
-                {title}
-            </label>
+        <button onMouseOut={onMouseOut} onMouseOver={onMouseOver} onClick={onClick} className="btn" style={{ backgroundColor: color, color: textColor ? textColor : "white" }}>
+            {isTitleString ?
+                <label>
+                    {title}
+                </label>
+                :
+                title
+            }
         </button>
     );
 }
