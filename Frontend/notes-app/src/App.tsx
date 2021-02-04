@@ -11,6 +11,7 @@ import MySvg from './Assets/41070-notepad-with-a-list-of-tick-boxes-and-5-star-f
 import Button from './Components/Button'
 import LoginClient from './Client/Login';
 import { gql, useMutation } from '@apollo/client';
+import Loading from './Components/Loading';
 
 type TModal = {
   title: string
@@ -39,6 +40,7 @@ function App() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [modal, setModal] = useState<TModal>(initialModalState);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleUsername = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value)
@@ -49,6 +51,8 @@ function App() {
   }
 
   const handlebtnLogin = () => {
+    setIsLoading(true);
+
     login({
       variables: {
         username, password
@@ -74,13 +78,16 @@ function App() {
         }
       })
       .catch((error) => {
-        const body:string = "Não foi possível realizar o login :( Tente novamente mais tarde.";
+        const body: string = "Não foi possível realizar o login :( Tente novamente mais tarde.";
 
         setModal({
           title: "Atenção",
           body,
           isVisible: true
         });
+      })
+      .finally(() => {
+        setIsLoading(false);
       })
   }
 
@@ -104,7 +111,7 @@ function App() {
             onClick={() => {
               setModal({
                 title: "",
-                body:"",
+                body: "",
                 isVisible: false
               })
             }}
@@ -167,6 +174,7 @@ function App() {
 
       </Container>
       <ErrorModal />
+      <Loading isLoading={isLoading} />
     </>
   );
 }
