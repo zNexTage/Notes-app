@@ -64,10 +64,48 @@ class NoteDao {
                         });
 
                         return;
-                    } 
+                    }
 
                     resolve({ error: {}, queryResult: results[0] });
                 });
+            })
+        })
+    }
+
+    notesByUser(userId) {
+        return new Promise((resolve, reject) => {
+            database.getConnection((err, con) => {
+                if (err) {
+                    console.log("Connection error", err);
+
+                    reject({
+                        error: "Não foi possível se conectar com o banco de dados",
+                        queryResult: {}
+                    });
+
+                    return;
+                }
+
+                const query = `
+                    SELECT NOTES.* FROM TB_NOTES NOTES
+                    INNER JOIN TB_USERS_NOTES USER_NOTE ON USER_NOTE.ID_NOTE = NOTES.ID_NOTE
+                    WHERE USER_NOTE.ID_USER = ?
+                `;
+
+                con.query(query, [userId], (err, notes) => {
+                    if (err) {
+                        reject({
+                            error: "Não foi possível obter as notas do usuário",
+                            queryResult: {}
+                        });
+
+                        return;
+                    }
+
+                    console.log("resolveu aqui no DAO");
+
+                    resolve({ error: {}, queryResult: notes });
+                })
             })
         })
     }
