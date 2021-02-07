@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import Login from '../Pages/Login/Login';
+import UserNotes from '../Pages/UserNotes';
 import UserProfile from '../Pages/UserProfile/UserProfile';
 
 function Routes() {
@@ -12,6 +13,9 @@ function Routes() {
                 </Route>
                 <Route path="/userprofile">
                     <UserProfile />
+                </Route>
+                <Route path="/usernotes">
+                    <UserNotes />
                 </Route>
             </Switch>
         </BrowserRouter>
