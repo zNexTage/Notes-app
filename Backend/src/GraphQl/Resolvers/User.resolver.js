@@ -2,7 +2,7 @@ const UserBll = require("../../../BLL/User.Bll");
 const UserDao = require("../../DAO/User.Dao");
 
 const UserResolver = {
-    Mutation: {
+    Query: {
         async Login(_, { username, password }) {
             try {
                 const userBll = new UserBll();
