@@ -14,13 +14,11 @@ class UserUtil {
 
         if (!jsonUser) {
             return null;
-        }
+        }        
 
         const user = JSON.parse(jsonUser);
-        
-        const { Login } = user;
 
-        return Login;
+        return user;
     }
 }
 
