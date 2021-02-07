@@ -9,18 +9,32 @@ import Loading from '../../Components/Loading';
 import Button from '../../Components/Button';
 import Plus from '../../Assets/plus.json'
 import Lottie from '../../Components/Lottie';
+import NoteCard from '../../Components/NoteCard';
+import { gql, useLazyQuery } from '@apollo/client';
+import Note from '../../Model/Note';
+import "../UserNotes/style.css";
 
+const GET_NOTES = gql`
+    query NotesByUser($idUser:Int!) {
+        NotesByUser(idUser: $idUser){
+            id
+            title
+            content
+            createdAt
+        }
+    }
+`;
 
 function UserProfile() {
     const [loggedUser, setLoggedUser] = useState<User>(new User);
     const history = useHistory();
-    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [playAnimation, setPlayAnimation] = useState<boolean>(false);
+    const [getNotes, { loading, data }] = useLazyQuery(GET_NOTES);
 
     useEffect(() => {
         const userUtil = new UserUtil();
 
-        const user: User | null = userUtil.GetUserFromCache();
+        const user: User | null = userUtil.GetUserFromCache(); 
 
         if (!user) {
             history.replace("/");
@@ -29,8 +43,16 @@ function UserProfile() {
         }
 
         setLoggedUser(user as User);
-        setIsLoading(false);
     }, []);
+
+    useEffect(() => {
+        getNotes({
+            variables: {
+                idUser: loggedUser.id
+            }
+        });
+        
+    }, [loggedUser]);
 
     function CreateNewNote() {
         return (
@@ -48,10 +70,14 @@ function UserProfile() {
         )
     }
 
+    function seeNotes() {
+        history.push("usernotes")
+    }
+
     return (
         <>
-            {isLoading && <Loading isLoading={isLoading} />}
-            {!isLoading && (
+            {loading && <Loading isLoading={loading} />}
+            {!loading && (
                 <div className="profile-notes-container">
                     <div className="user-profile-info">
                         <Avatar round="50%" textSizeRatio={1.75} size="140" name={`${loggedUser.name} ${loggedUser.lastname}`} src={loggedUser.picture} />
@@ -67,10 +93,17 @@ function UserProfile() {
                                 onMouseOut={() => setPlayAnimation(false)}
                                 onMouseOver={() => setPlayAnimation(true)}
                                 title={<CreateNewNote />} color="#8854E3" />
+
+                            <Button                                
+                                onClick={seeNotes}
+                                title="Ver Notas"
+                                color="#FAB064" />
                         </div>
                     </div>
-                    <div className="notes-container">
-
+                    <div id="notes-container" className="notes-container">
+                        {data && data.NotesByUser && data.NotesByUser.map((note: Note) => (
+                            <NoteCard key={`notecard___${note.id}`} note={note} />
+                        ))}
                     </div>
                 </div>
             )}

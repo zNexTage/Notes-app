@@ -7,12 +7,13 @@ import { Container, Modal } from 'react-bootstrap'
 import NoteIcon from '../../Components/NoteIcon';
 import MySvg from '../../Assets/41070-notepad-with-a-list-of-tick-boxes-and-5-star-feedback.json';
 import Button from '../../Components/Button'
-import { gql, useMutation } from '@apollo/client';
+import { gql } from '@apollo/client';
 import Loading from '../../Components/Loading';
 import { useHistory } from 'react-router-dom'
-import { GraphQLError } from 'graphql/error/GraphQLError';
-import User from '../../Model/User';
+import client from '../../Api';
 import UserUtil from '../../Util/UserUtil';
+import _ from 'lodash';
+import User from '../../Model/User';
 
 type TModal = {
   title: string
@@ -20,14 +21,9 @@ type TModal = {
   isVisible: boolean
 }
 
-type TLoginMutation = {
-  errors: readonly GraphQLError[] | undefined,
-  data: User
-}
-
 function App() {
-  const LOGIN_MUTATION = gql`
-  mutation login($username:String!, $password:String!){
+  const LOGIN_QUERY = gql`
+  query login($username:String!, $password:String!){
       Login(username:$username, password:$password){
           id
           name
@@ -47,12 +43,12 @@ function App() {
     isVisible: false
   } as TModal
 
-  const [login] = useMutation(LOGIN_MUTATION, { errorPolicy: 'all' });
+
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [modal, setModal] = useState<TModal>(initialModalState);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const history = useHistory();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleUsername = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value)
@@ -65,48 +61,43 @@ function App() {
   const handlebtnLogin = () => {
     setIsLoading(true);
 
-    login({
+    client.query({
+      query: LOGIN_QUERY,
       variables: {
         username, password
       }
-    })
-      .then(({ errors, data }) => {
-        if (errors) {
-          const body: Array<string> = new Array();
+    }).then((value) => {
+      if (!_.isUndefined(value.error) && !_.isEmpty(value.error)) {
+        let body = "";
 
-          errors.forEach((error, index) => {
-            const pError = `${error.message}\n`
-
-            body.push(pError);
-          });
-
-          setModal({
-            title: "Atenção",
-            body: body.join(","),
-            isVisible: true
-          });
-
-          return;
-        }
-
-        const userUtil = new UserUtil();
-
-        userUtil.SaveUserDataInCache(data as User);
-
-        history.push("userprofile");
-      })
-      .catch((error) => {
-        const body: string = "Não foi possível realizar o login :( Tente novamente mais tarde.";
+        value.error.graphQLErrors.forEach((err) => {
+          body += err.message;
+        });
 
         setModal({
-          title: "Atenção",
+          title: "Ops! Ocorreu um erro",
           body,
           isVisible: true
         });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      })
+
+        return;
+      }
+
+      const user = value.data.Login as User;      
+
+      new UserUtil().SaveUserDataInCache(user);
+
+      history.push("/userprofile");
+    }).catch((err) => {
+      setModal({
+        title: "Ops! Ocorreu um erro",
+        body: "Não foi possível realizar o login :( Tente novamente mais tarde!",
+        isVisible: true
+      });
+    }).finally(() => {
+      setIsLoading(false)
+    })
+
   }
 
   const ErrorModal = () => {
