@@ -1,9 +1,20 @@
-const NoteBll = require("../../../BLL/Note.Bll"); 
+const NoteBll = require("../../../BLL/Note.Bll");
 
 const NoteResolver = {
     Query: {
-        NotesByUser(_, { idUser }) {
+        async NotesByUser(_, { idUser }) {
+            const notesBll = new NoteBll();
 
+            try {
+                const notes = await notesBll.notesByUserId(idUser);
+
+                console.log(notes);
+
+                return notes;
+            }
+            catch (err) {
+                throw err;
+            }
         }
     },
     Note: {
@@ -18,7 +29,7 @@ const NoteResolver = {
 
                 const noteBll = new NoteBll();
 
-                const note = await noteBll.insertANote(title, content); 
+                const note = await noteBll.insertANote(title, content);
 
                 return note;
             } catch (error) {
