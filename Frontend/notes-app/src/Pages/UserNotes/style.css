@@ -1,0 +1,21 @@
+.notes-container{
+    width: 100%;
+    height: 100%;
+    background-color: var(--secondary-color);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-y: auto;
+}
+
+.notes-container-align > div{
+    justify-content: center;
+    flex-direction: column;
+}
+
+.notes-container-align > button{
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    align-items: flex-start;
+}
