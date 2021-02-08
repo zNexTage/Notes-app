@@ -16,6 +16,9 @@ import "../UserNotes/style.css";
 import client from '../../Api';
 import _ from 'lodash';
 import NoNotesRegistered from '../../Components/NoNotesRegistered';
+import { Modal } from 'react-bootstrap';
+import Input from '../../Components/Input';
+import Textarea from '../../Components/Input/Textarea';
 
 const GET_NOTES = gql`
     query NotesByUser($idUser:Int!) {
@@ -35,6 +38,7 @@ function UserProfile() {
     const [listNotes, setListNotes] = useState<Array<Note>>([]);
     const [isQuerySuccessful, setIsQuerySuccessful] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [showNotesModal, setShowNotesModal] = useState<boolean>(false);
 
     useEffect(() => {
         const userUtil = new UserUtil();
@@ -88,11 +92,12 @@ function UserProfile() {
         history.push("usernotes")
     }
 
-    function logoff(){
+    function logoff() {
         new UserUtil().ClearCache();
 
         history.replace("/")
     }
+
 
     return (
         <>
@@ -110,6 +115,10 @@ function UserProfile() {
 
                         <div className="create-notes-container">
                             <Button
+                                onClick={() => {
+                                    console.log('press');
+                                    setShowNotesModal(true)
+                                }}
                                 onMouseOut={() => setPlayAnimation(false)}
                                 onMouseOver={() => setPlayAnimation(true)}
                                 title={<CreateNewNote />} color="#8854E3" />
@@ -137,6 +146,27 @@ function UserProfile() {
                     </div>
                 </div>
             )}
+
+            <Modal backdrop="static" size="lg" centered show={showNotesModal}>
+                <Modal.Header className="notemodal-header">
+                    <h1>
+                        Nova Nota
+                    </h1>
+                </Modal.Header>
+                <Modal.Body className="notemodal-body">
+                    <Input placeholder="Título" type="text" />
+
+                    <Textarea placeholder="Descrição" />
+                </Modal.Body>
+                <Modal.Footer className="notemodal-footer">
+                    <Button title="Criar :)" color="#49E367" />
+
+                    <Button
+                        onClick={() => setShowNotesModal(false)}
+                        title="Sair :|"
+                        color="#E35F73" />
+                </Modal.Footer>
+            </Modal>
         </>
     );
 }

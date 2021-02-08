@@ -6,7 +6,7 @@
 }
 
 .user-profile-info{
-    width: 20%;
+    width: 30%;
     height: 100%;
     background-color: var(--primary-color);
     display: flex;
@@ -73,3 +73,15 @@
     }    
 }
 
+.notemodal-header{
+    background-color: #5E2563;
+    color: white;
+}
+
+.notemodal-body,  .notemodal-body + div{
+    background-color: rgba(94, 37, 99, .5);    
+}
+
+.notemodal-footer{
+    flex-direction: row;
+}
