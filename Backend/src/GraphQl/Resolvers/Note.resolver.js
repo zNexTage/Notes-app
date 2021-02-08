@@ -25,11 +25,11 @@ const NoteResolver = {
     Mutation: {
         async CreateNewNote(_, { newNote }) {
             try {
-                const { title, content } = newNote;
+                const { title, content, idUser } = newNote;
 
                 const noteBll = new NoteBll();
 
-                const note = await noteBll.insertANote(title, content);
+                const note = await noteBll.insertANote(title, content, idUser);
 
                 return note;
             } catch (error) {

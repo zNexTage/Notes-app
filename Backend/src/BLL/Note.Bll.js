@@ -1,8 +1,9 @@
 const NoteDao = require("../DAO/Note.Dao");
 const _ = require('lodash');
+const UserNoteDao = require("../DAO/User.Note.Dao");
 
 class NoteBll {
-    async insertANote(title, content) {
+    async insertANote(title, content, userId) {
         const noteDao = new NoteDao();
 
         const { queryResult, error } = await noteDao.insertNote(title, content);
@@ -18,6 +19,8 @@ class NoteBll {
         }
 
         const newNote = queryNoteById.queryResult;
+
+        new UserNoteDao().createRelation(userId, newNote.id_note);
 
         return newNote;
     }
