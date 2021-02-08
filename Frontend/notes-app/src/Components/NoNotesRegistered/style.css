@@ -1,0 +1,12 @@
+
+.no-notes-registered-container{
+    justify-content: center;
+    flex: 1;
+    text-align: center;
+    align-items: center;
+}
+
+.no-notes-registered-container > h2{
+    color:white;
+    text-align: center;
+}
