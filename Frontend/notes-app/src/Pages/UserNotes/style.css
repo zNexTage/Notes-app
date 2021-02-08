@@ -8,10 +8,10 @@
     overflow-y: auto;
 }
 
-.notes-container-align > div{
-    justify-content: center;
+.notes-container-align{
     flex-direction: column;
 }
+
 
 .notes-container-align > button{
     width: 100%;
