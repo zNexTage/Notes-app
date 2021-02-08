@@ -13,6 +13,9 @@ import NoteCard from '../../Components/NoteCard';
 import { gql, useLazyQuery } from '@apollo/client';
 import Note from '../../Model/Note';
 import "../UserNotes/style.css";
+import client from '../../Api';
+import _ from 'lodash';
+import NoNotesRegistered from '../../Components/NoNotesRegistered';
 
 const GET_NOTES = gql`
     query NotesByUser($idUser:Int!) {
@@ -26,10 +29,12 @@ const GET_NOTES = gql`
 `;
 
 function UserProfile() {
-    const [loggedUser, setLoggedUser] = useState<User>(new User);
+    const [loggedUser, setLoggedUser] = useState<User>(new User());
     const history = useHistory();
     const [playAnimation, setPlayAnimation] = useState<boolean>(false);
-    const [getNotes, { loading, data }] = useLazyQuery(GET_NOTES);
+    const [listNotes, setListNotes] = useState<Array<Note>>([]);
+    const [isQuerySuccessful, setIsQuerySuccessful] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const userUtil = new UserUtil();
@@ -42,17 +47,26 @@ function UserProfile() {
             return;
         }
 
+        setIsLoading(true);
+
+        client.query({
+            query:GET_NOTES,
+            variables:{
+                idUser: user.id
+            }
+        }).then((value)=>{
+            const notes= value.data.NotesByUser;
+
+            setListNotes(notes);
+            setIsQuerySuccessful(true);
+        }).catch((err)=>{
+            setIsQuerySuccessful(false);
+        }).finally(()=>{
+            setIsLoading(false);
+        })
+
         setLoggedUser(user as User);
     }, []);
-
-    useEffect(() => {
-        getNotes({
-            variables: {
-                idUser: loggedUser.id
-            }
-        });
-        
-    }, [loggedUser]);
 
     function CreateNewNote() {
         return (
@@ -76,8 +90,8 @@ function UserProfile() {
 
     return (
         <>
-            {loading && <Loading isLoading={loading} />}
-            {!loading && (
+            {isLoading && <Loading isLoading={isLoading} />}
+            {!isLoading && (
                 <div className="profile-notes-container">
                     <div className="user-profile-info">
                         <Avatar round="50%" textSizeRatio={1.75} size="140" name={`${loggedUser.name} ${loggedUser.lastname}`} src={loggedUser.picture} />
@@ -101,9 +115,14 @@ function UserProfile() {
                         </div>
                     </div>
                     <div id="notes-container" className="notes-container">
-                        {data && data.NotesByUser && data.NotesByUser.map((note: Note) => (
-                            <NoteCard key={`notecard___${note.id}`} note={note} />
-                        ))}
+                        {
+                            !_.isEmpty(listNotes) ? 
+                            listNotes.map((note: Note) => (
+                                <NoteCard key={`notecard___${note.id}`} note={note} />
+                            ))
+                            :
+                          <NoNotesRegistered animationWidth="80%" />
+                        }
                     </div>
                 </div>
             )}
