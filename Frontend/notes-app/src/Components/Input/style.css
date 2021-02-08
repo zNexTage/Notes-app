@@ -1,4 +1,4 @@
-input{
+input, textarea{
     height: 60px;
     font-size: 30px;
     border-radius: 5px;
@@ -7,12 +7,17 @@ input{
     background-color: #F87AD6;
     color: white;
     border: none; 
+    margin: 10px;
   }
 
-  input::placeholder{
+  textarea {
+      height: 200px;
+  }
+
+  input::placeholder, textarea::placeholder{
       color: white;
   }
 
-  input:focus{
+  input:focus, textarea:focus{
       outline: none;
   }
