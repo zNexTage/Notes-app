@@ -1,4 +1,4 @@
-const NoteBll = require("../../../BLL/Note.Bll");
+const NoteBll = require("../../BLL/Note.Bll");
 
 const NoteResolver = {
     Query: {

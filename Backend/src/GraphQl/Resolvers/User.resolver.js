@@ -1,4 +1,4 @@
-const UserBll = require("../../../BLL/User.Bll");
+const UserBll = require("../../BLL/User.Bll");
 const UserDao = require("../../DAO/User.Dao");
 
 const UserResolver = {
