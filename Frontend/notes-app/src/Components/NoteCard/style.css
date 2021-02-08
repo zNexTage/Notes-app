@@ -1,6 +1,6 @@
 .note-card{
-    width: 350px;
-    height: 350px;
+    width: 320px;
+    height: 320px;
     background-color: #D75FE3;
     border-radius: 20px;
     color: whitesmoke;
@@ -22,17 +22,14 @@
     width: 5px;
 }
 
-/* Track */
 .note-card-content::-webkit-scrollbar-track {
    background: #f1f1f1;
 }
-  
-  /* Handle */
+ 
 .note-card-content::-webkit-scrollbar-thumb {
     background: #888;
-}
+}  
   
-  /* Handle on hover */
 .note-card-content::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
