@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import NoteCard from '../../Components/NoteCard';
 import _ from 'lodash';
-import { gql, useLazyQuery } from '@apollo/client';
+import { gql } from '@apollo/client';
 import Loading from '../../Components/Loading';
 import User from '../../Model/User';
 import UserUtil from '../../Util/UserUtil';
@@ -10,6 +10,7 @@ import "./style.css";
 import Button from '../../Components/Button';
 import client from '../../Api';
 import Note from '../../Model/Note';
+import NoNotesRegistered from '../../Components/NoNotesRegistered';
 
 const GET_NOTES = gql`
     query NotesByUser($idUser:Int!) {
@@ -25,7 +26,7 @@ const GET_NOTES = gql`
 function UserNotes() {
     const history = useHistory();
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [listNotes, setNotes] = useState<Array<Note>>(new Array());
+    const [listNotes, setNotes] = useState<Array<Note>>([]);
 
     useEffect(() => {
         const userUtil = new UserUtil();
@@ -49,6 +50,8 @@ function UserNotes() {
             setNotes(response.data.NotesByUser);
         }).catch((err) => {
             console.log(err);
+        }).finally(()=>{
+            setIsLoading(false);
         });
     }, []);
 
@@ -66,9 +69,7 @@ function UserNotes() {
                         <NoteCard key={`notecard___${note.id}`} note={note} />
                     ))}
                     {_.isEmpty(listNotes) &&
-                        <div>
-                            <h1>Usuário não possui notas</h1>
-                        </div>
+                        <NoNotesRegistered />
                     }
                 </>
             )}
