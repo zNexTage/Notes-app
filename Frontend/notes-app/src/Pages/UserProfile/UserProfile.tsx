@@ -39,7 +39,7 @@ function UserProfile() {
     useEffect(() => {
         const userUtil = new UserUtil();
 
-        const user: User | null = userUtil.GetUserFromCache(); 
+        const user: User | null = userUtil.GetUserFromCache();
 
         if (!user) {
             history.replace("/");
@@ -50,18 +50,18 @@ function UserProfile() {
         setIsLoading(true);
 
         client.query({
-            query:GET_NOTES,
-            variables:{
+            query: GET_NOTES,
+            variables: {
                 idUser: user.id
             }
-        }).then((value)=>{
-            const notes= value.data.NotesByUser;
+        }).then((value) => {
+            const notes = value.data.NotesByUser;
 
             setListNotes(notes);
             setIsQuerySuccessful(true);
-        }).catch((err)=>{
+        }).catch((err) => {
             setIsQuerySuccessful(false);
-        }).finally(()=>{
+        }).finally(() => {
             setIsLoading(false);
         })
 
@@ -88,6 +88,12 @@ function UserProfile() {
         history.push("usernotes")
     }
 
+    function logoff(){
+        new UserUtil().ClearCache();
+
+        history.replace("/")
+    }
+
     return (
         <>
             {isLoading && <Loading isLoading={isLoading} />}
@@ -108,20 +114,25 @@ function UserProfile() {
                                 onMouseOver={() => setPlayAnimation(true)}
                                 title={<CreateNewNote />} color="#8854E3" />
 
-                            <Button                                
+                            <Button
                                 onClick={seeNotes}
                                 title="Ver Notas"
                                 color="#FAB064" />
+
+                            <Button
+                                onClick={logoff}
+                                title="Sair"
+                                color="#F04D66" />
                         </div>
                     </div>
                     <div id="notes-container" className="notes-container">
                         {
-                            !_.isEmpty(listNotes) ? 
-                            listNotes.map((note: Note) => (
-                                <NoteCard key={`notecard___${note.id}`} note={note} />
-                            ))
-                            :
-                          <NoNotesRegistered animationWidth="80%" />
+                            !_.isEmpty(listNotes) ?
+                                listNotes.map((note: Note) => (
+                                    <NoteCard key={`notecard___${note.id}`} note={note} />
+                                ))
+                                :
+                                <NoNotesRegistered animationWidth="80%" />
                         }
                     </div>
                 </div>

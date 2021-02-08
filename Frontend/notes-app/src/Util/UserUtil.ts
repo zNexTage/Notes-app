@@ -20,6 +20,10 @@ class UserUtil {
 
         return user;
     }
+
+    ClearCache(){
+        localStorage.removeItem(this.USER_KEY);
+    }
 }
 
 export default UserUtil;
