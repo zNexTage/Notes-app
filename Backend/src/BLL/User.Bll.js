@@ -1,4 +1,4 @@
-const UserDao = require("../src/DAO/User.Dao");
+const UserDao = require("../DAO/User.Dao");
 const bcrypt = require('bcrypt');
 
 class UserBll {

@@ -1,4 +1,4 @@
-const NoteDao = require("../src/DAO/Note.Dao");
+const NoteDao = require("../DAO/Note.Dao");
 const _ = require('lodash');
 
 class NoteBll {
