@@ -3,6 +3,7 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import Login from '../Pages/Login/Login';
 import UserNotes from '../Pages/UserNotes';
 import UserProfile from '../Pages/UserProfile/UserProfile';
+import ErrorPage from '../Pages/Error/';
 
 function Routes() {
     return (
@@ -16,6 +17,9 @@ function Routes() {
                 </Route>
                 <Route path="/usernotes">
                     <UserNotes />
+                </Route>
+                <Route path="/error">
+                    <ErrorPage />
                 </Route>
             </Switch>
         </BrowserRouter>
