@@ -10,15 +10,14 @@ import Button from '../../Components/Button';
 import Plus from '../../Assets/plus.json'
 import Lottie from '../../Components/Lottie';
 import NoteCard from '../../Components/NoteCard';
-import { gql, useLazyQuery } from '@apollo/client';
+import { gql } from '@apollo/client';
 import Note from '../../Model/Note';
 import "../UserNotes/style.css";
 import client from '../../Api';
 import _ from 'lodash';
 import NoNotesRegistered from '../../Components/NoNotesRegistered';
-import { Modal } from 'react-bootstrap';
-import Input from '../../Components/Input';
-import Textarea from '../../Components/Input/Textarea';
+import NoteModal from '../../Components/Modal/NoteModal';
+import StatusModal, { StatusAnimation } from '../../Components/Modal/StatusModal';
 
 const GET_NOTES = gql`
     query NotesByUser($idUser:Int!) {
@@ -36,9 +35,12 @@ function UserProfile() {
     const history = useHistory();
     const [playAnimation, setPlayAnimation] = useState<boolean>(false);
     const [listNotes, setListNotes] = useState<Array<Note>>([]);
-    const [isQuerySuccessful, setIsQuerySuccessful] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [showNotesModal, setShowNotesModal] = useState<boolean>(false);
+    const [noteTitle, setNoteTitle] = useState<string>("");
+    const [noteDescription, setNoteDescription] = useState<string>("");
+    const [showStatusAnimation, setShowStatusAnimation] = useState<boolean>(false);
+    const [statusAnimation, setStatusAnimation] = useState<StatusAnimation>(StatusAnimation.NO_STATUS);
 
     useEffect(() => {
         const userUtil = new UserUtil();
@@ -53,21 +55,32 @@ function UserProfile() {
 
         setIsLoading(true);
 
-        client.query({
+        const queryOptions = {
             query: GET_NOTES,
             variables: {
                 idUser: user.id
             }
-        }).then((value) => {
-            const notes = value.data.NotesByUser;
+        }
 
-            setListNotes(notes);
-            setIsQuerySuccessful(true);
-        }).catch((err) => {
-            setIsQuerySuccessful(false);
-        }).finally(() => {
+        const apolloCache = client.readQuery(queryOptions);
+
+        if (!_.isEmpty(apolloCache)) {
+            const { NotesByUser } = apolloCache;
+
+            setListNotes(NotesByUser);
             setIsLoading(false);
-        })
+        }
+        else {
+            client.query(queryOptions).then((value) => {
+                const notes = value.data.NotesByUser;
+
+                setListNotes(notes);
+            }).catch((err) => {
+                history.replace("error");
+            }).finally(() => {
+                setIsLoading(false);
+            });
+        }
 
         setLoggedUser(user as User);
     }, []);
@@ -98,6 +111,63 @@ function UserProfile() {
         history.replace("/")
     }
 
+    function handlerTitle(title: string): void {
+        setNoteTitle(title);
+    }
+
+    function handlerDescription(description: string): void {
+        setNoteDescription(description);
+    }
+
+    function createNote() {
+        const userId = loggedUser.id;
+
+        setIsLoading(true);
+
+        const ADD_NOTE = gql` 
+        mutation CreateNewNote($title:String!, $content:String!, $idUser:Int!) {
+            CreateNewNote(newNote:{title: $title, content: $content, idUser: $idUser}) {
+              id
+              title
+              content
+              createdAt
+            }
+          }`;
+
+        client.mutate({
+            mutation: ADD_NOTE,
+            variables: {
+                title: noteTitle,
+                content: noteDescription,
+                idUser: userId
+            }
+        }).then((value) => {
+            const note = value.data.CreateNewNote as Note;
+
+            const listNotesUpdated = [...listNotes, note];
+
+            setListNotes(listNotesUpdated);
+
+            client.writeQuery({
+                query: GET_NOTES,
+                data: {
+                    NotesByUser: listNotesUpdated
+                },
+                variables: {
+                    idUser: userId
+                }
+            });
+
+            setStatusAnimation(StatusAnimation.SUCCESS);
+            setShowNotesModal(false);
+        }).catch((err) => {
+            setStatusAnimation(StatusAnimation.ERROR);
+            console.log(err);
+        }).finally(() => {
+            setIsLoading(false);
+            setShowStatusAnimation(true);
+        })
+    }
 
     return (
         <>
@@ -115,10 +185,7 @@ function UserProfile() {
 
                         <div className="create-notes-container">
                             <Button
-                                onClick={() => {
-                                    console.log('press');
-                                    setShowNotesModal(true)
-                                }}
+                                onClick={() => setShowNotesModal(true)}
                                 onMouseOut={() => setPlayAnimation(false)}
                                 onMouseOver={() => setPlayAnimation(true)}
                                 title={<CreateNewNote />} color="#8854E3" />
@@ -147,26 +214,18 @@ function UserProfile() {
                 </div>
             )}
 
-            <Modal backdrop="static" size="lg" centered show={showNotesModal}>
-                <Modal.Header className="notemodal-header">
-                    <h1>
-                        Nova Nota
-                    </h1>
-                </Modal.Header>
-                <Modal.Body className="notemodal-body">
-                    <Input placeholder="Título" type="text" />
+            <NoteModal
+                onConfirm={createNote}
+                onTitleChange={handlerTitle}
+                onDescriptionChange={handlerDescription}
+                showModal={showNotesModal}
+                onClose={() => setShowNotesModal(false)} />
 
-                    <Textarea placeholder="Descrição" />
-                </Modal.Body>
-                <Modal.Footer className="notemodal-footer">
-                    <Button title="Criar :)" color="#49E367" />
 
-                    <Button
-                        onClick={() => setShowNotesModal(false)}
-                        title="Sair :|"
-                        color="#E35F73" />
-                </Modal.Footer>
-            </Modal>
+            {showStatusAnimation &&
+                <StatusModal
+                    statusAnimation={statusAnimation}
+                    onAnimationCompleted={() => setShowStatusAnimation(false)} />}
         </>
     );
 }

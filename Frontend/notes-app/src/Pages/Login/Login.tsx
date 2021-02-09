@@ -58,46 +58,63 @@ function App() {
     setPassword(event.target.value);
   }
 
-  const handlebtnLogin = () => {
+  const handlebtnLogin = async () => {
     setIsLoading(true);
 
-    client.query({
+    const queryOptions = {
       query: LOGIN_QUERY,
       variables: {
         username, password
       }
-    }).then((value) => {
-      if (!_.isUndefined(value.error) && !_.isEmpty(value.error)) {
-        let body = "";
+    }
 
-        value.error.graphQLErrors.forEach((err) => {
-          body += err.message;
-        });
+    try {
+      const apolloCache = client.readQuery(queryOptions);
 
-        setModal({
-          title: "Ops! Ocorreu um erro",
-          body,
-          isVisible: true
-        });
+      console.log(apolloCache);
+      if (!_.isEmpty(apolloCache)) {
 
-        return;
+        const { Login } = apolloCache;
+
+        new UserUtil().SaveUserDataInCache(Login as User);
+
+        history.replace("/userprofile");
       }
+      else {
+        const { error, data } = await client.query(queryOptions);
 
-      const user = value.data.Login as User;      
+        if (!_.isUndefined(error) && !_.isEmpty(error)) {
+          let body = "";
 
-      new UserUtil().SaveUserDataInCache(user);
+          error.graphQLErrors.forEach((err) => {
+            body += err.message;
+          });
 
-      history.push("/userprofile");
-    }).catch((err) => {
+          setModal({
+            title: "Ops! Ocorreu um erro",
+            body,
+            isVisible: true
+          });
+        }
+        else {
+          const user = data.Login as User;
+
+          new UserUtil().SaveUserDataInCache(user);
+
+          history.replace("/userprofile");
+        }
+      }
+    }
+    catch (err) {
       setModal({
         title: "Ops! Ocorreu um erro",
         body: "Não foi possível realizar o login :( Tente novamente mais tarde!",
         isVisible: true
       });
-    }).finally(() => {
+    }
+    finally {
       setIsLoading(false)
-    })
-
+    }
   }
 
   const ErrorModal = () => {
