@@ -1,0 +1,13 @@
+.yes-no-modal-body{
+    padding: 80px;
+    text-align: center;
+}
+
+.yes-no-footer button{
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.yes-no-modal-body h1{
+    color: white;
+}

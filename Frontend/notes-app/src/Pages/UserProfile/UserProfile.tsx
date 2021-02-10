@@ -16,8 +16,9 @@ import "../UserNotes/style.css";
 import client from '../../Api';
 import _ from 'lodash';
 import NoNotesRegistered from '../../Components/NoNotesRegistered';
-import NoteModal from '../../Components/Modal/NoteModal';
+import NoteModal, { TypeModal } from '../../Components/Modal/NoteModal';
 import StatusModal, { StatusAnimation } from '../../Components/Modal/StatusModal';
+import YesNoModal from '../../Components/Modal/YesNoModal';
 
 const GET_NOTES = gql`
     query NotesByUser($idUser:Int!) {
@@ -30,17 +31,23 @@ const GET_NOTES = gql`
     }
 `;
 
+enum Modals {
+    NONE = 0,
+    NOTES_MODAL = 1,
+    YES_NO_MODAL = 2
+}
+
 function UserProfile() {
     const [loggedUser, setLoggedUser] = useState<User>(new User());
     const history = useHistory();
     const [playAnimation, setPlayAnimation] = useState<boolean>(false);
     const [listNotes, setListNotes] = useState<Array<Note>>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [showNotesModal, setShowNotesModal] = useState<boolean>(false);
-    const [noteTitle, setNoteTitle] = useState<string>("");
-    const [noteDescription, setNoteDescription] = useState<string>("");
+    const [showModal, setShowModal] = useState<Modals>(Modals.NONE);
     const [showStatusAnimation, setShowStatusAnimation] = useState<boolean>(false);
     const [statusAnimation, setStatusAnimation] = useState<StatusAnimation>(StatusAnimation.NO_STATUS);
+    const [typeModal, setTypeModal] = useState<TypeModal>(TypeModal.CREATE);
+    const [noteToUpdate, setNoteToUpdate] = useState<Note>();
 
     useEffect(() => {
         const userUtil = new UserUtil();
@@ -101,25 +108,26 @@ function UserProfile() {
         )
     }
 
-    function seeNotes() {
+    const seeNotes = () => {
         history.push("usernotes")
     }
 
-    function logoff() {
+    const logoff = () => {
         new UserUtil().ClearCache();
 
         history.replace("/")
     }
 
-    function handlerTitle(title: string): void {
-        setNoteTitle(title);
+    const handlerNotes = ({ note, isNewNote }: { note: Note, isNewNote: boolean }) => {
+        /*if (isNewNote) {
+            createNote(note.title, note.content)
+        }*/
+
+        console.log(note, isNewNote);
+
     }
 
-    function handlerDescription(description: string): void {
-        setNoteDescription(description);
-    }
-
-    function createNote() {
+    const createNote = (noteTitle: string, noteContent: string) => {
         const userId = loggedUser.id;
 
         setIsLoading(true);
@@ -138,7 +146,7 @@ function UserProfile() {
             mutation: ADD_NOTE,
             variables: {
                 title: noteTitle,
-                content: noteDescription,
+                content: noteContent,
                 idUser: userId
             }
         }).then((value) => {
@@ -159,7 +167,7 @@ function UserProfile() {
             });
 
             setStatusAnimation(StatusAnimation.SUCCESS);
-            setShowNotesModal(false);
+            setShowModal(Modals.NOTES_MODAL);
         }).catch((err) => {
             setStatusAnimation(StatusAnimation.ERROR);
             console.log(err);
@@ -185,7 +193,11 @@ function UserProfile() {
 
                         <div className="create-notes-container">
                             <Button
-                                onClick={() => setShowNotesModal(true)}
+                                onClick={() => {
+                                    setNoteToUpdate(undefined);
+                                    setTypeModal(TypeModal.CREATE);
+                                    setShowModal(Modals.NOTES_MODAL);
+                                }}
                                 onMouseOut={() => setPlayAnimation(false)}
                                 onMouseOver={() => setPlayAnimation(true)}
                                 title={<CreateNewNote />} color="#8854E3" />
@@ -205,7 +217,17 @@ function UserProfile() {
                         {
                             !_.isEmpty(listNotes) ?
                                 listNotes.map((note: Note) => (
-                                    <NoteCard key={`notecard___${note.id}`} note={note} />
+                                    <NoteCard
+                                        onRemoveButtonClick={() => {
+                                            setShowModal(Modals.YES_NO_MODAL);
+                                        }}
+                                        onUpdateButtonClick={() => {
+                                            setNoteToUpdate(note);
+                                            setTypeModal(TypeModal.UPDATE);
+                                            setShowModal(Modals.NOTES_MODAL);
+                                        }}
+                                        key={`notecard___${note.id}`}
+                                        note={note} />
                                 ))
                                 :
                                 <NoNotesRegistered animationWidth="80%" />
@@ -215,11 +237,22 @@ function UserProfile() {
             )}
 
             <NoteModal
-                onConfirm={createNote}
-                onTitleChange={handlerTitle}
-                onDescriptionChange={handlerDescription}
-                showModal={showNotesModal}
-                onClose={() => setShowNotesModal(false)} />
+                key={`${showModal}`}
+                noteToUpdate={noteToUpdate}
+                onConfirm={handlerNotes}
+                showModal={showModal === Modals.NOTES_MODAL}
+                typeModal={typeModal}
+                onClose={() => setShowModal(Modals.NONE)} />
+
+            <YesNoModal
+                showModal={showModal === Modals.YES_NO_MODAL}
+                onYesButtonClick={() => {
+
+                }}
+                onNoButtonClick={() => {
+                    setShowModal(Modals.NONE);
+                }}
+            />
 
 
             {showStatusAnimation &&

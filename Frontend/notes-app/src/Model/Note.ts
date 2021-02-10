@@ -5,7 +5,12 @@ class Note {
     title:string
     content:string
     createdAt:Date
-    user:User
+    user:User;
+
+    constructor(title:string, content:string){
+        this.title = title;
+        this.content = content;
+    }    
 }
 
 export default Note;

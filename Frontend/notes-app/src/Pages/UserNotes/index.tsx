@@ -66,7 +66,15 @@ function UserNotes() {
                         color="#C055C9" />
                     <br />
                     {!_.isEmpty(listNotes) && listNotes.map((note: Note) => (
-                        <NoteCard key={`notecard___${note.id}`} note={note} />
+                        <NoteCard
+                            onRemoveButtonClick={()=>{
+                                
+                            }} 
+                            onUpdateButtonClick={()=>{
+
+                            }}
+                            key={`notecard___${note.id}`}
+                            note={note} />
                     ))}
                     {_.isEmpty(listNotes) &&
                         <NoNotesRegistered />

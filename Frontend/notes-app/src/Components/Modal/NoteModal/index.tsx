@@ -1,34 +1,82 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
+import Note from '../../../Model/Note';
 import Button from '../../Button';
 import Input from '../../Input';
 import Textarea from '../../Input/Textarea';
 
+enum TypeModal {
+    CREATE = 1, UPDATE = 2
+}
+
 type Props = {
     showModal: boolean
     onClose: () => void;
-    onConfirm: () => void;
-    onTitleChange: (title: string) => void;
-    onDescriptionChange: (description: string) => void;
+    onConfirm: ({ note, isNewNote }: { note: Note, isNewNote: boolean }) => void;
+    typeModal: TypeModal;
+    noteToUpdate?: Note;
 }
 
-function NoteModal({ showModal, onClose, onConfirm, onTitleChange, onDescriptionChange }: Props) {
+const modalConfig = {
+    [TypeModal.CREATE]: {
+        title: "Nova Nota",
+        btnTitle: "Criar :)"
+    },
+    [TypeModal.UPDATE]: {
+        title: "Atualizar Nota",
+        btnTitle: "Atualizar :)"
+    }
+}
+
+function NoteModal({ showModal, onClose, onConfirm, typeModal, noteToUpdate }: Props) {
+        
+    const [noteTitle, setNoteTitle] = useState<string>("");
+    const [noteContent, setNoteContent] = useState<string>("");
+
+    useEffect(()=>{
+        if(noteToUpdate){
+            setNoteTitle(noteToUpdate.title);
+            setNoteContent(noteToUpdate.content);
+        }
+    }, []);
+
+    
     return (
         <Modal backdrop="static" size="lg" centered show={showModal}>
             <Modal.Header className="notemodal-header">
                 <h1>
-                    Nova Nota
-            </h1>
+                    {modalConfig[typeModal].title}
+                </h1>
             </Modal.Header>
             <Modal.Body className="notemodal-body">
-                <Input onChange={(e) => onTitleChange(e.target.value)} placeholder="Título" type="text" />
+                <Input
+                    value={noteTitle}
+                    onChange={(e) => setNoteTitle(e.target.value)}
+                    placeholder="Título"
+                    type="text" />
 
-                <Textarea placeholder="Descrição" onChange={(e) => onDescriptionChange(e.target.value)} />
+                <Textarea
+                    value={noteContent}
+                    placeholder="Descrição"
+                    onChange={(e) => setNoteContent(e.target.value)} />
             </Modal.Body>
             <Modal.Footer className="notemodal-footer">
                 <Button
-                    onClick={onConfirm}
-                    title="Criar :)"
+                    onClick={() => {
+                        const noteToMutate = new Note(noteTitle, noteContent);
+                        let isNewNote = typeModal === TypeModal.CREATE;
+
+                        if (!isNewNote) {
+                            noteToMutate.id = noteToUpdate!.id;
+                            noteToMutate.createdAt = noteToUpdate!.createdAt;
+                        }
+
+                        onConfirm({
+                            note: noteToMutate,
+                            isNewNote
+                        });
+                    }}
+                    title={modalConfig[typeModal].btnTitle}
                     color="#49E367" />
 
                 <Button
@@ -41,3 +89,7 @@ function NoteModal({ showModal, onClose, onConfirm, onTitleChange, onDescription
 }
 
 export default NoteModal;
+
+export {
+    TypeModal
+}

@@ -71,7 +71,6 @@ function App() {
     try {
       const apolloCache = client.readQuery(queryOptions);
 
-      console.log(apolloCache);
       if (!_.isEmpty(apolloCache)) {
 
         const { Login } = apolloCache;
@@ -81,8 +80,9 @@ function App() {
         history.replace("/userprofile");
       }
       else {
-        const { error, data } = await client.query(queryOptions);
+        const { error, data, errors } = await client.query(queryOptions);
 
+        console.log(data, error, errors);
         if (!_.isUndefined(error) && !_.isEmpty(error)) {
           let body = "";
 

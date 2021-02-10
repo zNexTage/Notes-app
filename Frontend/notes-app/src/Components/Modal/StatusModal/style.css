@@ -11,7 +11,7 @@
 }
 
 .success-modal-bg{
-    background-color: #5FE378;
+    background-color: var(--pastel-green);
 }
 
 .error-modal-bg{

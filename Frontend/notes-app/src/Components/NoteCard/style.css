@@ -1,16 +1,26 @@
 .note-card{
-    width: 320px;
-    height: 320px;
+    width: 300px;
+    height: 300px;
     background-color: #D75FE3;
     border-radius: 20px;
     color: whitesmoke;
-    padding: 10px;
     margin: 10px;
+}
+
+.note-card header{
+    background-color: darkmagenta;
+    padding: 8px;
+    border-radius: 20px 20px 0 0;
+}
+
+.note-card header > label {
+    font-size: 15px;
 }
 
 .note-card-content {
     flex: 6;
     overflow: auto;
+    padding: 8px;
 }
 
 .note-card-content > label{
@@ -38,6 +48,15 @@
     flex: 1;
     justify-content: center;
     align-items: center;
+    flex-direction: row;
+}
+
+.note-card-footer button:nth-of-type(1){
+    border-radius: 0 0 0 20px;
+}
+
+.note-card-footer button:nth-of-type(2){
+    border-radius: 0 0 20px 0;
 }
 
 @media(max-width:590px){
