@@ -3,19 +3,21 @@ import React from 'react'
 
 
 type Props = {
-    placeholder: string
-    onChange?:(event: React.ChangeEvent<HTMLTextAreaElement>)=>void
+    placeholder: string;
+    onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    value: string;
 }
 
-function Textarea({placeholder, onChange}:Props){
+function Textarea({ placeholder, onChange, value }: Props) {
     return (
-        <textarea 
-        autoCapitalize="sentences"
-        autoComplete="on"
-        onChange={onChange} 
-        spellCheck={true}
-        minLength={1}
-        placeholder={placeholder}></textarea> 
+        <textarea
+            autoCapitalize="sentences"
+            autoComplete="on"
+            onChange={onChange}
+            spellCheck={true}
+            minLength={1}
+            value={value}
+            placeholder={placeholder}></textarea>
     )
 }
 
