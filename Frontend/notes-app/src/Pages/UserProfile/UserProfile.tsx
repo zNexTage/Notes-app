@@ -119,12 +119,9 @@ function UserProfile() {
     }
 
     const handlerNotes = ({ note, isNewNote }: { note: Note, isNewNote: boolean }) => {
-        /*if (isNewNote) {
+        if (isNewNote) {
             createNote(note.title, note.content)
-        }*/
-
-        console.log(note, isNewNote);
-
+        }
     }
 
     const createNote = (noteTitle: string, noteContent: string) => {
@@ -174,6 +171,7 @@ function UserProfile() {
         }).finally(() => {
             setIsLoading(false);
             setShowStatusAnimation(true);
+            setShowModal(Modals.NONE);
         })
     }
 
