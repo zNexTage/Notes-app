@@ -25,6 +25,16 @@ class NoteBll {
         return newNote;
     }
 
+    async updateNote(idNote, { title, content, idUser }) {
+        const noteDao = new NoteDao();
+
+        await noteDao.deleteNote(idNote);
+
+        const newNote = await this.insertANote(title, content, idUser);
+
+        return newNote;
+    }
+
     async notesByUserId(userId) {
         const notesDao = new NoteDao();
 

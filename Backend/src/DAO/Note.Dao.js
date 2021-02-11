@@ -1,4 +1,5 @@
 const database = require('../Config/Database/Database');
+const dedent = require('dedent-js');
 
 class NoteDao {
     insertNote(title, content) {
@@ -38,6 +39,49 @@ class NoteDao {
                 })
             })
         });
+    }
+
+    deleteNote(idNote){
+        return new Promise((resolve, reject)=>{
+            database.getConnection((err, connection)=>{
+                if (err) {
+                    console.log("Connection error", err);
+
+                    reject({
+                        error: "Não foi possível se conectar com o banco de dados",
+                        queryResult: {}
+                    });
+
+                    return;
+                }
+
+                const query = dedent(`
+                    UPDATE TB_NOTES 
+                    SET updatedAt = ?
+                    WHERE id_note = ?
+                `);
+
+                connection.query(query, [new Date(), idNote], (err, results)=>{
+                    connection.release();
+
+                    if (err) {
+                        console.log("Query error", err);
+
+                        reject({
+                            error: "Ocorreu um erro ao remover a nota!",
+                            queryResult: {}
+                        });
+
+                        return;
+                    }
+
+                    resolve({
+                        queryResult: results,
+                        error: {}
+                    })
+                })
+            })
+        })
     }
 
     noteById(idNote) {
