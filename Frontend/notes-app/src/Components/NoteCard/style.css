@@ -64,3 +64,10 @@
         width: 90%;
     }
 }
+
+@media(min-width: 1380px){
+    .note-card{
+        width: 340px;
+        height: 340px;
+    }
+}
