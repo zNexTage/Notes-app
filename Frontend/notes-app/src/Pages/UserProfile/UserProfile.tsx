@@ -17,8 +17,13 @@ import client from '../../Api';
 import _ from 'lodash';
 import NoNotesRegistered from '../../Components/NoNotesRegistered';
 import NoteModal, { TypeModal } from '../../Components/Modal/NoteModal';
-import StatusModal, { StatusAnimation } from '../../Components/Modal/StatusModal';
+import StatusAnimation, { FullscreenAnimationOptions } from '../../Components/FullscreenAnimation';
 import YesNoModal from '../../Components/Modal/YesNoModal';
+
+import SuccessAnimation from '../../Assets/success-animation.json';
+import ErrorAnimation from '../../Assets/error-animation.json';
+import NoteClient from '../../Client/Note.client';
+
 
 const GET_NOTES = gql`
     query NotesByUser($idUser:Int!) {
@@ -45,7 +50,7 @@ function UserProfile() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [showModal, setShowModal] = useState<Modals>(Modals.NONE);
     const [showStatusAnimation, setShowStatusAnimation] = useState<boolean>(false);
-    const [statusAnimation, setStatusAnimation] = useState<StatusAnimation>(StatusAnimation.NO_STATUS);
+    const [fullscreenAnimationOptions, setFullscreenAnimationOptions] = useState<FullscreenAnimationOptions>();
     const [typeModal, setTypeModal] = useState<TypeModal>(TypeModal.CREATE);
     const [noteToUpdate, setNoteToUpdate] = useState<Note>();
 
@@ -62,34 +67,14 @@ function UserProfile() {
 
         setIsLoading(true);
 
-        const queryOptions = {
-            query: GET_NOTES,
-            variables: {
-                idUser: user.id
-            }
-        }
-
-        const apolloCache = client.readQuery(queryOptions);
-
-        if (!_.isEmpty(apolloCache)) {
-            const { NotesByUser } = apolloCache;
-
-            setListNotes(NotesByUser);
-            setIsLoading(false);
-        }
-        else {
-            client.query(queryOptions).then((value) => {
-                const notes = value.data.NotesByUser;
-
-                setListNotes(notes);
-            }).catch((err) => {
-                history.replace("error");
-            }).finally(() => {
-                setIsLoading(false);
-            });
-        }
-
         setLoggedUser(user as User);
+
+        NoteClient.getUserNotes(user.id).then((listNotes) => {
+            setListNotes(listNotes.reverse());
+            setIsLoading(false);
+        }).catch(() => {
+            history.replace("/");
+        });
     }, []);
 
     function CreateNewNote() {
@@ -122,6 +107,9 @@ function UserProfile() {
         if (isNewNote) {
             createNote(note.title, note.content)
         }
+        else {
+            updateNote(note);
+        }
     }
 
     const createNote = (noteTitle: string, noteContent: string) => {
@@ -129,50 +117,74 @@ function UserProfile() {
 
         setIsLoading(true);
 
-        const ADD_NOTE = gql` 
-        mutation CreateNewNote($title:String!, $content:String!, $idUser:Int!) {
-            CreateNewNote(newNote:{title: $title, content: $content, idUser: $idUser}) {
-              id
-              title
-              content
-              createdAt
-            }
-          }`;
+        NoteClient.createNewNote({ noteTitle, noteContent, userId })
+            .then((note: Note) => {
+                const listNotesUpdated = [...listNotes, note];
 
-        client.mutate({
-            mutation: ADD_NOTE,
-            variables: {
-                title: noteTitle,
-                content: noteContent,
-                idUser: userId
-            }
-        }).then((value) => {
-            const note = value.data.CreateNewNote as Note;
+                setListNotes(listNotesUpdated.reverse());
 
-            const listNotesUpdated = [...listNotes, note];
+                client.writeQuery({
+                    query: GET_NOTES,
+                    data: {
+                        NotesByUser: listNotesUpdated
+                    },
+                    variables: {
+                        idUser: userId
+                    }
+                });
 
-            setListNotes(listNotesUpdated);
-
-            client.writeQuery({
-                query: GET_NOTES,
-                data: {
-                    NotesByUser: listNotesUpdated
-                },
-                variables: {
-                    idUser: userId
-                }
+                setFullscreenAnimationOptions({
+                    animation: SuccessAnimation,
+                    color: "#5FE378",
+                    text: `Sua nota foi adicionada com sucesso!`
+                });
+            }).catch(() => {
+                setFullscreenAnimationOptions({
+                    animation: ErrorAnimation,
+                    color: "#963041",
+                    text: "Ops! Não foi possível adicionar a sua nota :("
+                });
+            }).finally(() => {
+                setIsLoading(false);
+                setShowStatusAnimation(true);
+                setShowModal(Modals.NONE);
             });
+    }
 
-            setStatusAnimation(StatusAnimation.SUCCESS);
-            setShowModal(Modals.NOTES_MODAL);
+    const updateNote = (noteToUpdate: Note) => {
+        const userId = loggedUser.id;
+
+        setIsLoading(true);
+
+        NoteClient.updateNote(noteToUpdate.id, {
+            noteContent: noteToUpdate.content,
+            noteTitle: noteToUpdate.title,
+            userId
+        }).then((updatedNote) => {
+            const updatedListNotes = listNotes.filter((note) => note.id !== noteToUpdate.id);
+
+            updatedListNotes.push(updatedNote);
+
+            setListNotes([...updatedListNotes, updatedNote].reverse());
+
+            NoteClient.updateNotesCache(updatedListNotes, userId);
+
+            setFullscreenAnimationOptions({
+                animation: SuccessAnimation,
+                color: "#5FE378",
+                text: `Sua nota foi atualizada com sucesso!`
+            });
         }).catch((err) => {
-            setStatusAnimation(StatusAnimation.ERROR);
-            console.log(err);
+            setFullscreenAnimationOptions({
+                animation: ErrorAnimation,
+                color: "#963041",
+                text: "Ops! Não foi possível atualizar a sua nota :("
+            });
         }).finally(() => {
             setIsLoading(false);
             setShowStatusAnimation(true);
             setShowModal(Modals.NONE);
-        })
+        });
     }
 
     return (
@@ -254,9 +266,12 @@ function UserProfile() {
 
 
             {showStatusAnimation &&
-                <StatusModal
-                    statusAnimation={statusAnimation}
-                    onAnimationCompleted={() => setShowStatusAnimation(false)} />}
+                <StatusAnimation
+                    options={fullscreenAnimationOptions!}
+                    onAnimationCompleted={() => {
+                        setShowStatusAnimation(false)
+                        setFullscreenAnimationOptions({ animation: "", color: "", text: "" });
+                    }} />}
         </>
     );
 }
