@@ -59,7 +59,7 @@ function UserProfile() {
 
         const user: User | null = userUtil.GetUserFromCache();
 
-        if (!user) {
+        if (_.isEmpty(user)) {
             history.replace("/");
 
             return;
@@ -69,11 +69,11 @@ function UserProfile() {
 
         setLoggedUser(user as User);
 
-        NoteClient.getUserNotes(user.id).then((listNotes) => {
-            setListNotes(listNotes.reverse());
+        NoteClient.getUserNotes(user!.id).then((listNotes) => {
+            setListNotes(listNotes);
             setIsLoading(false);
-        }).catch(() => {
-            history.replace("/");
+        }).catch((err) => {
+            history.replace("error");
         });
     }, []);
 
@@ -123,15 +123,7 @@ function UserProfile() {
 
                 setListNotes(listNotesUpdated.reverse());
 
-                client.writeQuery({
-                    query: GET_NOTES,
-                    data: {
-                        NotesByUser: listNotesUpdated
-                    },
-                    variables: {
-                        idUser: userId
-                    }
-                });
+                NoteClient.updateNotesCache(listNotesUpdated, userId);
 
                 setFullscreenAnimationOptions({
                     animation: SuccessAnimation,
@@ -165,7 +157,7 @@ function UserProfile() {
 
             updatedListNotes.push(updatedNote);
 
-            setListNotes([...updatedListNotes, updatedNote].reverse());
+            setListNotes([...updatedListNotes].reverse());
 
             NoteClient.updateNotesCache(updatedListNotes, userId);
 
