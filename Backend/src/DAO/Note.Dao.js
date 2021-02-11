@@ -133,7 +133,7 @@ class NoteDao {
                 const query = `
                     SELECT NOTES.* FROM TB_NOTES NOTES
                     INNER JOIN TB_USERS_NOTES USER_NOTE ON USER_NOTE.ID_NOTE = NOTES.ID_NOTE
-                    WHERE USER_NOTE.ID_USER = ?
+                    WHERE USER_NOTE.ID_USER = ? AND updatedAt IS NULL ORDER BY createdAt DESC
                 `;
 
                 con.query(query, [userId], (err, notes) => {
