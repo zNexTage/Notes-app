@@ -35,6 +35,11 @@ const NoteResolver = {
             } catch (error) {
                 throw error;
             }
+        },
+        async UpdateNote(_, { idNote, newNote }) {
+            const note = await new NoteBll().updateNote(idNote, newNote)
+
+            return note;
         }
     }
 }
