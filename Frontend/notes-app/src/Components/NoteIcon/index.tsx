@@ -8,6 +8,7 @@ type Props = {
 function NoteIcon({width, height}:Props){
     return (
         <img 
+        alt="Icon"
         style={{width, height}}
         src={Icon}
         />
