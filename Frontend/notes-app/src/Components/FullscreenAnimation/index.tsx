@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
-import SuccessAnimation from '../../../Assets/lf20_pJo4Hp.json';
-import ErrorAnimation from '../../../Assets/error-animation.json';
 import './style.css';
-import Lottie from '../../Lottie';
+import Lottie from '../Lottie';
 
-enum StatusAnimation {
-    SUCCESS = 1,
-    ERROR = 2,
-    NO_STATUS = 3
+type FullscreenAnimationOptions = {
+    animation: any;
+    color: string;
+    text: string;
 }
 
 type Props = {
     onAnimationCompleted: () => void;
-    statusAnimation: StatusAnimation;
+    options: FullscreenAnimationOptions
 }
 
-function StatusModal({ onAnimationCompleted, statusAnimation }: Props) {
+function FullscreenAnimation({ onAnimationCompleted, options }: Props) {
     const animationControl = useAnimation();
     const [removeFromDom, setRemoveFromDom] = useState<boolean>(false)
+    const { animation, color, text } = options;
 
     useEffect(() => {
         animationControl.start({
@@ -39,35 +38,21 @@ function StatusModal({ onAnimationCompleted, statusAnimation }: Props) {
         clearTimeout(endAnimation);
     }, 2100);
 
-    let statusColorClass;
-
-    const isSuccess = statusAnimation === StatusAnimation.SUCCESS;
-
-    if (isSuccess) {
-        statusColorClass = "success-modal-bg";
-    }
-    else {
-        statusColorClass = "error-modal-bg";
-    }
-
     return (
         <>
             {
                 !removeFromDom &&
                 <motion.div
                     animate={animationControl}
-                    className={`status-modal-container ${statusColorClass}`}>
+                    style={{ backgroundColor: color }}
+                    className={`status-modal-container`}>
                     <Lottie
-                        animationData={
-                            isSuccess ?
-                                SuccessAnimation :
-                                ErrorAnimation
-                        }
+                        animationData={animation}
                         width="30%"
                         autoplay
                         loop={false} />
                     <label>
-                        {isSuccess ? "Nota criada com sucesso!" : "Ops! Não foi possível criar a nota"}
+                        {text}
                     </label>
                 </motion.div>
             }
@@ -75,8 +60,8 @@ function StatusModal({ onAnimationCompleted, statusAnimation }: Props) {
     )
 }
 
-export default StatusModal;
+export default FullscreenAnimation;
 
-export {
-    StatusAnimation
+export type {
+    FullscreenAnimationOptions
 }
