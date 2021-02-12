@@ -12,11 +12,12 @@ type FullscreenAnimationOptions = {
 }
 
 type Props = {
-    onAnimationCompleted: () => void;
-    options: FullscreenAnimationOptions
+    onAnimationStart?: () => void;
+    onAnimationCompleted?: () => void;
+    options: FullscreenAnimationOptions;
 }
 
-function FullscreenAnimation({ onAnimationCompleted, options }: Props) {
+function FullscreenAnimation({ onAnimationStart, onAnimationCompleted, options }: Props) {
     const animationControl = useAnimation();
     const [removeFromDom, setRemoveFromDom] = useState<boolean>(false)
     const { animation, color, text, animationTime, width } = options;
@@ -25,7 +26,9 @@ function FullscreenAnimation({ onAnimationCompleted, options }: Props) {
         animationControl.start({
             opacity: 1,
             transition: { duration: 1 }
-        });
+        }).then(() => {
+            onAnimationStart && onAnimationStart();
+        })
     }, []);
 
     const endAnimation = setTimeout(() => {
@@ -34,7 +37,7 @@ function FullscreenAnimation({ onAnimationCompleted, options }: Props) {
             transition: { duration: 1 }
         }).then(() => {
             setRemoveFromDom(true);
-            onAnimationCompleted();
+            onAnimationCompleted && onAnimationCompleted();
         });
 
         clearTimeout(endAnimation);
