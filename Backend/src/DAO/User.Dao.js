@@ -6,7 +6,7 @@ class UserDao {
             try {
                 const query = "SELECT * FROM TB_USERS WHERE username = ?";
 
-                database.getConnection((err, connection) => { 
+                database.getConnection((err, connection) => {
                     if (err) {
                         console.log("Connection error", err);
 
@@ -19,7 +19,8 @@ class UserDao {
                     }
 
                     connection.query(query, [username], (err, result) => {
-                        connection.release(); 
+                        connection.release();
+                        connection.destroy();
 
                         if (err) {
                             console.log("Query error", err);
@@ -31,6 +32,8 @@ class UserDao {
 
                             return;
                         }
+
+                        console.log(result);
 
                         resolve({
                             error: {},

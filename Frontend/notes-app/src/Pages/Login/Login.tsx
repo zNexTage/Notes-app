@@ -7,13 +7,11 @@ import { Container, Modal } from 'react-bootstrap'
 import NoteIcon from '../../Components/NoteIcon';
 import MySvg from '../../Assets/41070-notepad-with-a-list-of-tick-boxes-and-5-star-feedback.json';
 import Button from '../../Components/Button'
-import { gql } from '@apollo/client';
 import Loading from '../../Components/Loading';
 import { useHistory } from 'react-router-dom'
-import client from '../../Api';
 import UserUtil from '../../Util/UserUtil';
-import _ from 'lodash';
 import User from '../../Model/User';
+import UserClient from '../../Client/User.client';
 
 type TModal = {
   title: string
@@ -22,20 +20,6 @@ type TModal = {
 }
 
 function App() {
-  const LOGIN_QUERY = gql`
-  query login($username:String!, $password:String!){
-      Login(username:$username, password:$password){
-          id
-          name
-          lastname
-          picture
-          username
-          picture
-          createdAt
-      }
-  }    
-  
-  `;
 
   const initialModalState = {
     title: "",
@@ -61,60 +45,20 @@ function App() {
   const handlebtnLogin = async () => {
     setIsLoading(true);
 
-    const queryOptions = {
-      query: LOGIN_QUERY,
-      variables: {
-        username, password
-      }
-    }
-
-    try {
-      const apolloCache = client.readQuery(queryOptions);
-
-      if (!_.isEmpty(apolloCache)) {
-
-        const { Login } = apolloCache;
-
-        new UserUtil().SaveUserDataInCache(Login as User);
-
-        history.replace("/userprofile");
-      }
-      else {
-        const { error, data, errors } = await client.query(queryOptions);
-
-        console.log(data, error, errors);
-        if (!_.isUndefined(error) && !_.isEmpty(error)) {
-          let body = "";
-
-          error.graphQLErrors.forEach((err) => {
-            body += err.message;
-          });
-
-          setModal({
-            title: "Ops! Ocorreu um erro",
-            body,
-            isVisible: true
-          });
-        }
-        else {
-          const user = data.Login as User;
-
-          new UserUtil().SaveUserDataInCache(user);
-
-          history.replace("/userprofile");
-        }
-      }
-    }
-    catch (err) {
-      setModal({
-        title: "Ops! Ocorreu um erro",
-        body: "Não foi possível realizar o login :( Tente novamente mais tarde!",
-        isVisible: true
-      });
-    }
-    finally {
-      setIsLoading(false)
-    }
+    UserClient.login(username, password)
+      .then((user) => {
+        new UserUtil().SaveUserDataInCache(user);        
+        history.push("userprofile");
+      })
+      .catch((err) => {
+        setModal({
+          title: "Ops! Ocorreu um erro",
+          body: err,
+          isVisible: true
+        });
+      }).finally(() => {
+        setIsLoading(false)
+      })
   }
 
   const ErrorModal = () => {

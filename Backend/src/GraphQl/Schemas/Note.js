@@ -11,6 +11,7 @@ const Note = `
         title:String!
         content:String!
         idUser:Int!
+        createdAt:Date
     }
 `;
 

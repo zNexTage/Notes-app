@@ -16,10 +16,7 @@ function NoNotesRegistered({animationWidth}:Props) {
                 loop
                 width={animationWidth}
             />
-            <h2>Você ainda não criou nenhuma nota...</h2>
-            <h2>
-                Vamos criar?
-            </h2>
+            <h2>Sua lista de notas está vazia...</h2>
         </div>
     )
 }

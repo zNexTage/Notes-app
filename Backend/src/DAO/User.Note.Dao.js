@@ -1,12 +1,12 @@
 const database = require('../Config/Database/Database')
 const _ = require("lodash");
 
-class UserNoteDao{
-    createRelation(userId, noteId){
-        return new Promise((resolve, reject)=>{
-            try{
-                database.getConnection((err, connection)=>{
-                    if(!_.isEmpty(err)){
+class UserNoteDao {
+    createRelation(userId, noteId) {
+        return new Promise((resolve, reject) => {
+            try {
+                database.getConnection((err, connection) => {
+                    if (!_.isEmpty(err)) {
                         reject({
                             error: "Não foi possível se conectar com o banco de dados",
                             queryResult: {}
@@ -20,15 +20,16 @@ class UserNoteDao{
                         VALUES(?, ?)
                     `;
 
-                    connection.query(query,[userId, noteId],((err, results)=>{
+                    connection.query(query, [userId, noteId], ((err, results) => {
                         connection.release();
+                        connection.destroy();
 
-                        if(!_.isEmpty(err)){
+                        if (!_.isEmpty(err)) {
                             reject({
                                 error: "Não foi possível finalizar o cadastro da nota",
                                 queryResult: {}
                             })
-    
+
                             return;
                         }
 
@@ -39,7 +40,7 @@ class UserNoteDao{
                     }))
                 })
             }
-            catch(err){
+            catch (err) {
                 reject({
                     error: err,
                     queryResult: {}

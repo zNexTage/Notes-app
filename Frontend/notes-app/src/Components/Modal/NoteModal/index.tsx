@@ -4,48 +4,62 @@ import Note from '../../../Model/Note';
 import Button from '../../Button';
 import Input from '../../Input';
 import Textarea from '../../Input/Textarea';
-
-enum TypeModal {
-    CREATE = 1, UPDATE = 2
-}
+import { TypeModal } from '../Types';
 
 type Props = {
     showModal: boolean
     onClose: () => void;
     onConfirm: ({ note, isNewNote }: { note: Note, isNewNote: boolean }) => void;
-    typeModal: TypeModal;
-    noteToUpdate?: Note;
+    whichModal: TypeModal;
+    note?: Note;
 }
 
-const modalConfig = {
-    [TypeModal.CREATE]: {
-        title: "Nova Nota",
-        btnTitle: "Criar :)"
-    },
-    [TypeModal.UPDATE]: {
-        title: "Atualizar Nota",
-        btnTitle: "Atualizar :)"
-    }
-}
+function NoteModal({ showModal, onClose, onConfirm, whichModal, note }: Props) {
 
-function NoteModal({ showModal, onClose, onConfirm, typeModal, noteToUpdate }: Props) {
-        
     const [noteTitle, setNoteTitle] = useState<string>("");
     const [noteContent, setNoteContent] = useState<string>("");
 
-    useEffect(()=>{
-        if(noteToUpdate){
-            setNoteTitle(noteToUpdate.title);
-            setNoteContent(noteToUpdate.content);
+    useEffect(() => {
+        if (note) {
+            setNoteTitle(note.title);
+            setNoteContent(note.content);
         }
     }, []);
 
-    
+    const defineTextsOfModal = (typeModal: TypeModal) => {
+        let title, btnTitle;
+        switch (typeModal) {
+            case TypeModal.CREATE: {
+                title = "Nova Nota";
+                btnTitle = "Criar :)";
+
+                break;
+            }
+            case TypeModal.UPDATE: {
+                title = "Atualizar Nota";
+                btnTitle = "Atualizar :)"
+
+                break;
+            }
+
+            default: {
+                title = "";
+                btnTitle = ""
+            }
+        }
+
+        return {
+            title, btnTitle
+        }
+    }
+
+    const { title, btnTitle } = defineTextsOfModal(whichModal);
+
     return (
         <Modal backdrop="static" size="lg" centered show={showModal}>
             <Modal.Header className="notemodal-header">
                 <h1>
-                    {modalConfig[typeModal].title}
+                    {title}
                 </h1>
             </Modal.Header>
             <Modal.Body className="notemodal-body">
@@ -64,11 +78,11 @@ function NoteModal({ showModal, onClose, onConfirm, typeModal, noteToUpdate }: P
                 <Button
                     onClick={() => {
                         const noteToMutate = new Note(noteTitle, noteContent);
-                        let isNewNote = typeModal === TypeModal.CREATE;
+                        let isNewNote = whichModal === TypeModal.CREATE;
 
                         if (!isNewNote) {
-                            noteToMutate.id = noteToUpdate!.id;
-                            noteToMutate.createdAt = noteToUpdate!.createdAt;
+                            noteToMutate.id = note!.id;
+                            noteToMutate.createdAt = note!.createdAt;
                         }
 
                         onConfirm({
@@ -76,7 +90,7 @@ function NoteModal({ showModal, onClose, onConfirm, typeModal, noteToUpdate }: P
                             isNewNote
                         });
                     }}
-                    title={modalConfig[typeModal].btnTitle}
+                    title={btnTitle}
                     color="#49E367" />
 
                 <Button
@@ -90,6 +104,3 @@ function NoteModal({ showModal, onClose, onConfirm, typeModal, noteToUpdate }: P
 
 export default NoteModal;
 
-export {
-    TypeModal
-}

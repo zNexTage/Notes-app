@@ -9,32 +9,17 @@ import Loading from '../../Components/Loading';
 import Button from '../../Components/Button';
 import Plus from '../../Assets/plus.json'
 import Lottie from '../../Components/Lottie';
-import NoteCard from '../../Components/NoteCard';
-import { gql } from '@apollo/client';
 import Note from '../../Model/Note';
 import "../UserNotes/style.css";
-import client from '../../Api';
 import _ from 'lodash';
-import NoNotesRegistered from '../../Components/NoNotesRegistered';
-import NoteModal, { TypeModal } from '../../Components/Modal/NoteModal';
-import StatusModal, { StatusAnimation } from '../../Components/Modal/StatusModal';
-import YesNoModal from '../../Components/Modal/YesNoModal';
+import NoteClient from '../../Client/Note.client';
+import UserNotes from '../UserNotes';
+import ModalHandler, { TypeModal } from '../../Components/Modal/Types';
 
-const GET_NOTES = gql`
-    query NotesByUser($idUser:Int!) {
-        NotesByUser(idUser: $idUser){
-            id
-            title
-            content
-            createdAt
-        }
-    }
-`;
 
-enum Modals {
-    NONE = 0,
-    NOTES_MODAL = 1,
-    YES_NO_MODAL = 2
+const initialModalState: ModalHandler = {
+    show: false,
+    modalType: TypeModal.NONE
 }
 
 function UserProfile() {
@@ -43,18 +28,14 @@ function UserProfile() {
     const [playAnimation, setPlayAnimation] = useState<boolean>(false);
     const [listNotes, setListNotes] = useState<Array<Note>>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [showModal, setShowModal] = useState<Modals>(Modals.NONE);
-    const [showStatusAnimation, setShowStatusAnimation] = useState<boolean>(false);
-    const [statusAnimation, setStatusAnimation] = useState<StatusAnimation>(StatusAnimation.NO_STATUS);
-    const [typeModal, setTypeModal] = useState<TypeModal>(TypeModal.CREATE);
-    const [noteToUpdate, setNoteToUpdate] = useState<Note>();
+    const [modal, setModal] = useState<ModalHandler>(initialModalState);
 
     useEffect(() => {
         const userUtil = new UserUtil();
 
         const user: User | null = userUtil.GetUserFromCache();
 
-        if (!user) {
+        if (_.isEmpty(user)) {
             history.replace("/");
 
             return;
@@ -62,34 +43,14 @@ function UserProfile() {
 
         setIsLoading(true);
 
-        const queryOptions = {
-            query: GET_NOTES,
-            variables: {
-                idUser: user.id
-            }
-        }
-
-        const apolloCache = client.readQuery(queryOptions);
-
-        if (!_.isEmpty(apolloCache)) {
-            const { NotesByUser } = apolloCache;
-
-            setListNotes(NotesByUser);
-            setIsLoading(false);
-        }
-        else {
-            client.query(queryOptions).then((value) => {
-                const notes = value.data.NotesByUser;
-
-                setListNotes(notes);
-            }).catch((err) => {
-                history.replace("error");
-            }).finally(() => {
-                setIsLoading(false);
-            });
-        }
-
         setLoggedUser(user as User);
+
+        NoteClient.getUserNotes(user!.id).then((listNotes) => {
+            setListNotes(listNotes);
+            setIsLoading(false);
+        }).catch((err) => {
+            history.replace("error");
+        });
     }, []);
 
     function CreateNewNote() {
@@ -118,63 +79,6 @@ function UserProfile() {
         history.replace("/")
     }
 
-    const handlerNotes = ({ note, isNewNote }: { note: Note, isNewNote: boolean }) => {
-        if (isNewNote) {
-            createNote(note.title, note.content)
-        }
-    }
-
-    const createNote = (noteTitle: string, noteContent: string) => {
-        const userId = loggedUser.id;
-
-        setIsLoading(true);
-
-        const ADD_NOTE = gql` 
-        mutation CreateNewNote($title:String!, $content:String!, $idUser:Int!) {
-            CreateNewNote(newNote:{title: $title, content: $content, idUser: $idUser}) {
-              id
-              title
-              content
-              createdAt
-            }
-          }`;
-
-        client.mutate({
-            mutation: ADD_NOTE,
-            variables: {
-                title: noteTitle,
-                content: noteContent,
-                idUser: userId
-            }
-        }).then((value) => {
-            const note = value.data.CreateNewNote as Note;
-
-            const listNotesUpdated = [...listNotes, note];
-
-            setListNotes(listNotesUpdated);
-
-            client.writeQuery({
-                query: GET_NOTES,
-                data: {
-                    NotesByUser: listNotesUpdated
-                },
-                variables: {
-                    idUser: userId
-                }
-            });
-
-            setStatusAnimation(StatusAnimation.SUCCESS);
-            setShowModal(Modals.NOTES_MODAL);
-        }).catch((err) => {
-            setStatusAnimation(StatusAnimation.ERROR);
-            console.log(err);
-        }).finally(() => {
-            setIsLoading(false);
-            setShowStatusAnimation(true);
-            setShowModal(Modals.NONE);
-        })
-    }
-
     return (
         <>
             {isLoading && <Loading isLoading={isLoading} />}
@@ -192,9 +96,12 @@ function UserProfile() {
                         <div className="create-notes-container">
                             <Button
                                 onClick={() => {
-                                    setNoteToUpdate(undefined);
-                                    setTypeModal(TypeModal.CREATE);
-                                    setShowModal(Modals.NOTES_MODAL);
+                                    const modalConfig = {
+                                        modalType: TypeModal.CREATE,
+                                        show: true
+                                    };
+
+                                    setModal({...modalConfig});
                                 }}
                                 onMouseOut={() => setPlayAnimation(false)}
                                 onMouseOver={() => setPlayAnimation(true)}
@@ -211,52 +118,20 @@ function UserProfile() {
                                 color="#F04D66" />
                         </div>
                     </div>
-                    <div id="notes-container" className="notes-container">
-                        {
-                            !_.isEmpty(listNotes) ?
-                                listNotes.map((note: Note) => (
-                                    <NoteCard
-                                        onRemoveButtonClick={() => {
-                                            setShowModal(Modals.YES_NO_MODAL);
-                                        }}
-                                        onUpdateButtonClick={() => {
-                                            setNoteToUpdate(note);
-                                            setTypeModal(TypeModal.UPDATE);
-                                            setShowModal(Modals.NOTES_MODAL);
-                                        }}
-                                        key={`notecard___${note.id}`}
-                                        note={note} />
-                                ))
-                                :
-                                <NoNotesRegistered animationWidth="80%" />
-                        }
-                    </div>
+                    <UserNotes
+                        key={`${modal.show}`}
+                        showTurnBackButton={false}
+                        modalHandler={{
+                            modalType: modal.modalType,
+                            show: modal.show
+                        }}
+                        containerId="user-notes-container"
+                        onModalClose={() => {
+                            setModal({...initialModalState})
+                        }}
+                        notes={listNotes} />
                 </div>
             )}
-
-            <NoteModal
-                key={`${showModal}`}
-                noteToUpdate={noteToUpdate}
-                onConfirm={handlerNotes}
-                showModal={showModal === Modals.NOTES_MODAL}
-                typeModal={typeModal}
-                onClose={() => setShowModal(Modals.NONE)} />
-
-            <YesNoModal
-                showModal={showModal === Modals.YES_NO_MODAL}
-                onYesButtonClick={() => {
-
-                }}
-                onNoButtonClick={() => {
-                    setShowModal(Modals.NONE);
-                }}
-            />
-
-
-            {showStatusAnimation &&
-                <StatusModal
-                    statusAnimation={statusAnimation}
-                    onAnimationCompleted={() => setShowStatusAnimation(false)} />}
         </>
     );
 }

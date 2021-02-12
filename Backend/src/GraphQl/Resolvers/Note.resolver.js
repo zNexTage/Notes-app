@@ -8,8 +8,6 @@ const NoteResolver = {
             try {
                 const notes = await notesBll.notesByUserId(idUser);
 
-                console.log(notes);
-
                 return notes;
             }
             catch (err) {
@@ -30,6 +28,25 @@ const NoteResolver = {
                 const noteBll = new NoteBll();
 
                 const note = await noteBll.insertANote(title, content, idUser);
+
+                return note;
+            } catch (error) {
+                throw error;
+            }
+        },
+        async UpdateNote(_, { idNote, newNote }) {
+            try {
+                const note = await new NoteBll().updateNote(idNote, newNote)
+
+                return note;
+            }
+            catch(err){
+                throw err;
+            }
+        },
+        async DeleteNote(_, { idNote }) {
+            try {
+                const note = await new NoteBll().deleteNote(idNote);
 
                 return note;
             } catch (error) {
