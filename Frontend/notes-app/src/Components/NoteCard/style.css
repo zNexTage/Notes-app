@@ -17,6 +17,12 @@
     font-size: 15px;
 }
 
+.note-card header h1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .note-card-content {
     flex: 6;
     overflow: auto;
