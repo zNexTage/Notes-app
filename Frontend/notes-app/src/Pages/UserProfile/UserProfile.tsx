@@ -10,10 +10,8 @@ import Button from '../../Components/Button';
 import Plus from '../../Assets/plus.json'
 import Lottie from '../../Components/Lottie';
 import NoteCard from '../../Components/NoteCard';
-import { gql } from '@apollo/client';
 import Note from '../../Model/Note';
 import "../UserNotes/style.css";
-import client from '../../Api';
 import _ from 'lodash';
 import NoNotesRegistered from '../../Components/NoNotesRegistered';
 import NoteModal, { TypeModal } from '../../Components/Modal/NoteModal';
@@ -22,25 +20,11 @@ import YesNoModal from '../../Components/Modal/YesNoModal';
 
 import SuccessAnimation from '../../Assets/success-animation.json';
 import ErrorAnimation from '../../Assets/error-animation.json';
+import RemoveNoteAnimation from '../../Assets/remove_note.json';
+import UpdateNoteAnimation from '../../Assets/update_notes.json';
+
 import NoteClient from '../../Client/Note.client';
-
-
-const GET_NOTES = gql`
-    query NotesByUser($idUser:Int!) {
-        NotesByUser(idUser: $idUser){
-            id
-            title
-            content
-            createdAt
-        }
-    }
-`;
-
-enum Modals {
-    NONE = 0,
-    NOTES_MODAL = 1,
-    YES_NO_MODAL = 2
-}
+import Modals from '../../Enum/Modals';
 
 function UserProfile() {
     const [loggedUser, setLoggedUser] = useState<User>(new User());
@@ -53,6 +37,7 @@ function UserProfile() {
     const [fullscreenAnimationOptions, setFullscreenAnimationOptions] = useState<FullscreenAnimationOptions>();
     const [typeModal, setTypeModal] = useState<TypeModal>(TypeModal.CREATE);
     const [noteToUpdate, setNoteToUpdate] = useState<Note>();
+    const [noteToDelete, setNoteToDelete] = useState<Note>();
 
     useEffect(() => {
         const userUtil = new UserUtil();
@@ -155,8 +140,8 @@ function UserProfile() {
             userId
         }).then((updatedNote) => {
             //Atualiza no array de notas a nota que foi alterada pelo usuário.
-            const updatedListNotes = listNotes.map((note)=>{
-                if(note.id === noteToUpdate.id){ 
+            const updatedListNotes = listNotes.map((note) => {
+                if (note.id === noteToUpdate.id) {
                     return updatedNote;
                 }
 
@@ -168,10 +153,14 @@ function UserProfile() {
             NoteClient.updateNotesCache([...updatedListNotes], userId);
 
             setFullscreenAnimationOptions({
-                animation: SuccessAnimation,
+                animation: UpdateNoteAnimation,
                 color: "#5FE378",
-                text: `Sua nota foi atualizada com sucesso!`
+                text: `Sua nota foi atualizada com sucesso!`,
+                width: '50%'
             });
+
+            setShowModal(Modals.NONE);
+            setNoteToUpdate(undefined);
         }).catch((err) => {
             setFullscreenAnimationOptions({
                 animation: ErrorAnimation,
@@ -181,8 +170,38 @@ function UserProfile() {
         }).finally(() => {
             setIsLoading(false);
             setShowStatusAnimation(true);
-            setShowModal(Modals.NONE);
         });
+    }
+
+    const deleteNote = (idNote: number) => {
+        setIsLoading(true);
+
+        NoteClient.deleteNote(idNote).then(({ id }) => {
+            const updatedListNotes = listNotes.filter((note) => note.id !== id);
+
+            setListNotes([...updatedListNotes]);
+
+            NoteClient.updateNotesCache([...updatedListNotes], loggedUser.id);
+
+            setFullscreenAnimationOptions({
+                animation: RemoveNoteAnimation,
+                color: "#5FE378",
+                text: `Sua nota foi removida com sucesso!`,
+                animationTime: 3600
+            });
+
+            setShowModal(Modals.NONE);
+            setNoteToDelete(undefined);
+        }).catch((err) => {
+            setFullscreenAnimationOptions({
+                animation: ErrorAnimation,
+                color: "#963041",
+                text: "Ops! Não foi possível remover a sua nota :("
+            });
+        }).finally(() => {
+            setIsLoading(false);
+            setShowStatusAnimation(true);
+        })
     }
 
     return (
@@ -228,6 +247,7 @@ function UserProfile() {
                                     <NoteCard
                                         onRemoveButtonClick={() => {
                                             setShowModal(Modals.YES_NO_MODAL);
+                                            setNoteToDelete(note);
                                         }}
                                         onUpdateButtonClick={() => {
                                             setNoteToUpdate(note);
@@ -255,9 +275,10 @@ function UserProfile() {
             <YesNoModal
                 showModal={showModal === Modals.YES_NO_MODAL}
                 onYesButtonClick={() => {
-
+                    deleteNote(noteToDelete!.id);
                 }}
                 onNoButtonClick={() => {
+                    setNoteToDelete(undefined);
                     setShowModal(Modals.NONE);
                 }}
             />
