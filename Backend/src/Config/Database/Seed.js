@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const connection = require('./Database');
+const database = require('./Database');
 const saltRounds = 10;
 
 const Users = [
@@ -42,24 +42,26 @@ const run = () => {
     const usersWithHashPass = getUsers();
 
     try{
-        connection.connect();   
+        database.getConnection((err, connection)=>{
+            let query = 'INSERT INTO TB_USERS (name, lastname, username, password, picture) VALUES ?';
+
+            connection.query(query, [usersWithHashPass], (err, result)=>{
+                connection.release();
+                connection.destroy();
+                
+                if(err){
+                    console.log(err);
+                    return;
+                }
+    
+                console.log(result);
+            });
+        });   
         
-        let query = 'INSERT INTO TB_USERS (name, lastname, username, password, picture) VALUES ?';
-
-        connection.query(query, [usersWithHashPass], (err, result)=>{
-            if(err){
-                console.log(err);
-                return;
-            }
-
-            console.log(result);
-        });
+        
     }
     catch(err){
         console.log(err);
-    }
-    finally{
-        connection.end();
     }
 }
 

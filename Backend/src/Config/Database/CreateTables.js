@@ -30,9 +30,9 @@ const TbUserNotes = dedent(`
     );
 `);
 
-const createUserTable = () => {
+const createUserTable = (connection) => {
     return new Promise((resolve, reject) => {
-        communication.query(TbUser, (err, queryResult) => {
+        connection.query(TbUser, (err, queryResult) => {
             if (err) {
                 console.error("Error onCreateUserTable", err);
 
@@ -47,9 +47,9 @@ const createUserTable = () => {
     })
 };
 
-const createNotesTables = () => {
+const createNotesTables = (connection) => {
     return new Promise((resolve, reject) => {
-        communication.query(TbNotes, (err, queryResult) => {
+        connection.query(TbNotes, (err, queryResult) => {
             if (err) {
                 console.error("Error onCreateNotesTable", err);
 
@@ -64,9 +64,9 @@ const createNotesTables = () => {
     })
 }
 
-const createUserNotes = ()=>{
+const createUserNotes = (connection)=>{
     return new Promise((resolve, reject) => {
-        communication.query(TbUserNotes, (err, queryResult) => {
+        connection.query(TbUserNotes, (err, queryResult) => {
             if (err) {
                 console.error("Error onCreateUsersNotesTable", err);
 
@@ -82,16 +82,29 @@ const createUserNotes = ()=>{
 }
 
 const CreateTables = () => {
-    communication.connect();
+    communication.getConnection((err, connection)=>{
+        if(err){
+            throw err
+        }
 
-    Promise.all([
-        createUserTable(),
-        createNotesTables(),
-        createUserNotes()
-    ])
-        .finally(() => {
-            communication.end();
+        Promise.all([
+            createUserTable(connection),
+            createNotesTables(connection),
+            createUserNotes(connection)
+        ])
+        .then(()=>{
+            console.log("Sucesso! Tabelas criadas");
         })
+        .catch((err)=>{
+            throw err;
+        })
+            .finally(() => {
+                connection.release();
+                connection.destroy();
+            })
+    })
+
+  
 }
 
 CreateTables();
