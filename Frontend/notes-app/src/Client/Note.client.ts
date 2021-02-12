@@ -119,6 +119,31 @@ class NoteClient {
         })
     }
 
+    static deleteNote(idNote: number) {
+        const DELETE_NOTE = gql`
+            mutation DeleteNote($idNote:Int!){
+                DeleteNote(idNote:$idNote){
+                    id
+                }
+            }
+        `;
+
+        return new Promise((resolve: (note: Note) => void, reject) => {
+            client.mutate({
+                mutation: DELETE_NOTE,
+                variables:{
+                    idNote
+                }
+            }).then((value)=>{
+                const note = value.data.DeleteNote as Note;
+
+                resolve(note);
+            }).catch((err)=>{
+                reject(err);
+            });
+        })
+    }
+
     static updateNotesCache(listNotes: Array<Note>, userId: number) {
         client.writeQuery({
             query: GET_NOTES,
