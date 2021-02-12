@@ -7,6 +7,8 @@ type FullscreenAnimationOptions = {
     animation: any;
     color: string;
     text: string;
+    animationTime?: number;
+    width?: string | number;
 }
 
 type Props = {
@@ -17,7 +19,7 @@ type Props = {
 function FullscreenAnimation({ onAnimationCompleted, options }: Props) {
     const animationControl = useAnimation();
     const [removeFromDom, setRemoveFromDom] = useState<boolean>(false)
-    const { animation, color, text } = options;
+    const { animation, color, text, animationTime, width } = options;
 
     useEffect(() => {
         animationControl.start({
@@ -36,7 +38,7 @@ function FullscreenAnimation({ onAnimationCompleted, options }: Props) {
         });
 
         clearTimeout(endAnimation);
-    }, 2100);
+    }, animationTime ? animationTime : 2100);
 
     return (
         <>
@@ -48,7 +50,7 @@ function FullscreenAnimation({ onAnimationCompleted, options }: Props) {
                     className={`status-modal-container`}>
                     <Lottie
                         animationData={animation}
-                        width="30%"
+                        width={width ? width : "30%"}
                         autoplay
                         loop={false} />
                     <label>
