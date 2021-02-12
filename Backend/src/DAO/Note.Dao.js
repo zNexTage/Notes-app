@@ -29,6 +29,7 @@ class NoteDao {
 
                 connection.query(query, queryParams, (err, result) => {
                     connection.release();
+                    connection.destroy(); 
 
                     if (err) {
                         console.log("Query error", err);
@@ -72,6 +73,7 @@ class NoteDao {
 
                 connection.query(query, [new Date(), idNote], (err, results) => {
                     connection.release();
+                    connection.destroy(); 
 
                     if (err) {
                         console.log("Query error", err);
