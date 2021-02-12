@@ -151,15 +151,21 @@ function UserProfile() {
         NoteClient.updateNote(noteToUpdate.id, {
             noteContent: noteToUpdate.content,
             noteTitle: noteToUpdate.title,
+            createdAt: noteToUpdate.createdAt,
             userId
         }).then((updatedNote) => {
-            const updatedListNotes = listNotes.filter((note) => note.id !== noteToUpdate.id);
+            //Atualiza no array de notas a nota que foi alterada pelo usuário.
+            const updatedListNotes = listNotes.map((note)=>{
+                if(note.id === noteToUpdate.id){ 
+                    return updatedNote;
+                }
 
-            updatedListNotes.push(updatedNote);
+                return note;
+            });
 
-            setListNotes([...updatedListNotes].reverse());
+            setListNotes([...updatedListNotes]);
 
-            NoteClient.updateNotesCache(updatedListNotes, userId);
+            NoteClient.updateNotesCache([...updatedListNotes], userId);
 
             setFullscreenAnimationOptions({
                 animation: SuccessAnimation,
