@@ -3,10 +3,10 @@ const _ = require('lodash');
 const UserNoteDao = require("../DAO/User.Note.Dao");
 
 class NoteBll {
-    async insertANote(title, content, userId) {
+    async insertANote(title, content, userId, createdAt) {
         const noteDao = new NoteDao();
 
-        const { queryResult, error } = await noteDao.insertNote(title, content);
+        const { queryResult, error } = await noteDao.insertNote(title, content, createdAt);
 
         if (!_.isEmpty(error)) {
             throw error;
@@ -25,12 +25,12 @@ class NoteBll {
         return newNote;
     }
 
-    async updateNote(idNote, { title, content, idUser }) {
+    async updateNote(idNote, { title, content, createdAt, idUser }) {
         const noteDao = new NoteDao();
 
         await noteDao.deleteNote(idNote);
 
-        const newNote = await this.insertANote(title, content, idUser);
+        const newNote = await this.insertANote(title, content, idUser, createdAt);
 
         return newNote;
     }

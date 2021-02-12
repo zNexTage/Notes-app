@@ -1,8 +1,9 @@
 const database = require('../Config/Database/Database');
 const dedent = require('dedent-js');
+const _ = require('lodash');
 
 class NoteDao {
-    insertNote(title, content) {
+    insertNote(title, content, createdAt) {
         return new Promise((resolve, reject) => {
             database.getConnection((err, connection) => {
                 if (err) {
@@ -16,9 +17,17 @@ class NoteDao {
                     return;
                 }
 
-                const query = "INSERT INTO TB_NOTES (title, content) VALUES (?, ?)";
+                let query, queryParams;
 
-                connection.query(query, [title, content], (err, result) => {
+                if (!_.isEmpty(createdAt)) {
+                    query = "INSERT INTO TB_NOTES (title, content, createdAt) VALUES (?, ?, ?)";
+                    queryParams = [title, content, new Date(createdAt)];
+                } else {
+                    query = "INSERT INTO TB_NOTES (title, content) VALUES (?, ?)";
+                    queryParams = [title, content];
+                }
+
+                connection.query(query, queryParams, (err, result) => {
                     connection.release();
 
                     if (err) {
@@ -41,9 +50,9 @@ class NoteDao {
         });
     }
 
-    deleteNote(idNote){
-        return new Promise((resolve, reject)=>{
-            database.getConnection((err, connection)=>{
+    deleteNote(idNote) {
+        return new Promise((resolve, reject) => {
+            database.getConnection((err, connection) => {
                 if (err) {
                     console.log("Connection error", err);
 
@@ -61,7 +70,7 @@ class NoteDao {
                     WHERE id_note = ?
                 `);
 
-                connection.query(query, [new Date(), idNote], (err, results)=>{
+                connection.query(query, [new Date(), idNote], (err, results) => {
                     connection.release();
 
                     if (err) {
