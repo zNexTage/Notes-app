@@ -9,22 +9,18 @@ import Loading from '../../Components/Loading';
 import Button from '../../Components/Button';
 import Plus from '../../Assets/plus.json'
 import Lottie from '../../Components/Lottie';
-import NoteCard from '../../Components/NoteCard';
 import Note from '../../Model/Note';
 import "../UserNotes/style.css";
 import _ from 'lodash';
-import NoNotesRegistered from '../../Components/NoNotesRegistered';
-import NoteModal, { TypeModal } from '../../Components/Modal/NoteModal';
-import StatusAnimation, { FullscreenAnimationOptions } from '../../Components/FullscreenAnimation';
-import YesNoModal from '../../Components/Modal/YesNoModal';
-
-import SuccessAnimation from '../../Assets/success-animation.json';
-import ErrorAnimation from '../../Assets/error-animation.json';
-import RemoveNoteAnimation from '../../Assets/remove_note.json';
-import UpdateNoteAnimation from '../../Assets/update_notes.json';
-
 import NoteClient from '../../Client/Note.client';
-import Modals from '../../Enum/Modals';
+import UserNotes from '../UserNotes';
+import ModalHandler, { TypeModal } from '../../Components/Modal/Types';
+
+
+const initialModalState: ModalHandler = {
+    show: false,
+    modalType: TypeModal.NONE
+}
 
 function UserProfile() {
     const [loggedUser, setLoggedUser] = useState<User>(new User());
@@ -32,12 +28,7 @@ function UserProfile() {
     const [playAnimation, setPlayAnimation] = useState<boolean>(false);
     const [listNotes, setListNotes] = useState<Array<Note>>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [showModal, setShowModal] = useState<Modals>(Modals.NONE);
-    const [showStatusAnimation, setShowStatusAnimation] = useState<boolean>(false);
-    const [fullscreenAnimationOptions, setFullscreenAnimationOptions] = useState<FullscreenAnimationOptions>();
-    const [typeModal, setTypeModal] = useState<TypeModal>(TypeModal.CREATE);
-    const [noteToUpdate, setNoteToUpdate] = useState<Note>();
-    const [noteToDelete, setNoteToDelete] = useState<Note>();
+    const [modal, setModal] = useState<ModalHandler>(initialModalState);
 
     useEffect(() => {
         const userUtil = new UserUtil();
@@ -88,122 +79,6 @@ function UserProfile() {
         history.replace("/")
     }
 
-    const handlerNotes = ({ note, isNewNote }: { note: Note, isNewNote: boolean }) => {
-        if (isNewNote) {
-            createNote(note.title, note.content)
-        }
-        else {
-            updateNote(note);
-        }
-    }
-
-    const createNote = (noteTitle: string, noteContent: string) => {
-        const userId = loggedUser.id;
-
-        setIsLoading(true);
-
-        NoteClient.createNewNote({ noteTitle, noteContent, userId })
-            .then((note: Note) => {
-                const listNotesUpdated = [...listNotes, note];
-
-                setListNotes(listNotesUpdated.reverse());
-
-                NoteClient.updateNotesCache(listNotesUpdated, userId);
-
-                setFullscreenAnimationOptions({
-                    animation: SuccessAnimation,
-                    color: "#5FE378",
-                    text: `Sua nota foi adicionada com sucesso!`
-                });
-            }).catch(() => {
-                setFullscreenAnimationOptions({
-                    animation: ErrorAnimation,
-                    color: "#963041",
-                    text: "Ops! Não foi possível adicionar a sua nota :("
-                });
-            }).finally(() => {
-                setIsLoading(false);
-                setShowStatusAnimation(true);
-                setShowModal(Modals.NONE);
-            });
-    }
-
-    const updateNote = (noteToUpdate: Note) => {
-        const userId = loggedUser.id;
-
-        setIsLoading(true);
-
-        NoteClient.updateNote(noteToUpdate.id, {
-            noteContent: noteToUpdate.content,
-            noteTitle: noteToUpdate.title,
-            createdAt: noteToUpdate.createdAt,
-            userId
-        }).then((updatedNote) => {
-            //Atualiza no array de notas a nota que foi alterada pelo usuário.
-            const updatedListNotes = listNotes.map((note) => {
-                if (note.id === noteToUpdate.id) {
-                    return updatedNote;
-                }
-
-                return note;
-            });
-
-            setListNotes([...updatedListNotes]);
-
-            NoteClient.updateNotesCache([...updatedListNotes], userId);
-
-            setFullscreenAnimationOptions({
-                animation: UpdateNoteAnimation,
-                color: "#5FE378",
-                text: `Sua nota foi atualizada com sucesso!`,
-                width: '50%'
-            });
-
-            setShowModal(Modals.NONE);
-            setNoteToUpdate(undefined);
-        }).catch((err) => {
-            setFullscreenAnimationOptions({
-                animation: ErrorAnimation,
-                color: "#963041",
-                text: "Ops! Não foi possível atualizar a sua nota :("
-            });
-        }).finally(() => {
-            setIsLoading(false);
-            setShowStatusAnimation(true);
-        });
-    }
-
-    const deleteNote = (idNote: number) => {
-        setIsLoading(true);
-
-        NoteClient.deleteNote(idNote).then(({ id }) => {
-            const updatedListNotes = listNotes.filter((note) => note.id !== id);
-
-            setListNotes([...updatedListNotes]);
-
-            NoteClient.updateNotesCache([...updatedListNotes], loggedUser.id);
-
-            setFullscreenAnimationOptions({
-                animation: RemoveNoteAnimation,
-                color: "#5FE378",
-                text: `Sua nota foi removida com sucesso!`,
-                animationTime: 3600
-            });
-
-            setShowModal(Modals.NONE);
-            setNoteToDelete(undefined);
-        }).catch((err) => {
-            setFullscreenAnimationOptions({
-                animation: ErrorAnimation,
-                color: "#963041",
-                text: "Ops! Não foi possível remover a sua nota :("
-            });
-        }).finally(() => {
-            setIsLoading(false);
-            setShowStatusAnimation(true);
-        })
-    }
-
     return (
         <>
             {isLoading && <Loading isLoading={isLoading} />}
@@ -221,9 +96,12 @@ function UserProfile() {
                         <div className="create-notes-container">
                             <Button
                                 onClick={() => {
-                                    setNoteToUpdate(undefined);
-                                    setTypeModal(TypeModal.CREATE);
-                                    setShowModal(Modals.NOTES_MODAL);
+                                    const modalConfig = {
+                                        modalType: TypeModal.CREATE,
+                                        show: true
+                                    };
+
+                                    setModal({...modalConfig});
                                 }}
                                 onMouseOut={() => setPlayAnimation(false)}
                                 onMouseOver={() => setPlayAnimation(true)}
@@ -240,57 +118,20 @@ function UserProfile() {
                                 color="#F04D66" />
                         </div>
                     </div>
-                    <div id="notes-container" className="notes-container">
-                        {
-                            !_.isEmpty(listNotes) ?
-                                listNotes.map((note: Note) => (
-                                    <NoteCard
-                                        onRemoveButtonClick={() => {
-                                            setShowModal(Modals.YES_NO_MODAL);
-                                            setNoteToDelete(note);
-                                        }}
-                                        onUpdateButtonClick={() => {
-                                            setNoteToUpdate(note);
-                                            setTypeModal(TypeModal.UPDATE);
-                                            setShowModal(Modals.NOTES_MODAL);
-                                        }}
-                                        key={`notecard___${note.id}`}
-                                        note={note} />
-                                ))
-                                :
-                                <NoNotesRegistered animationWidth="80%" />
-                        }
-                    </div>
+                    <UserNotes
+                        key={`${modal.show}`}
+                        showTurnBackButton={false}
+                        modalHandler={{
+                            modalType: modal.modalType,
+                            show: modal.show
+                        }}
+                        containerId="user-notes-container"
+                        onModalClose={() => {
+                            setModal({...initialModalState})
+                        }}
+                        notes={listNotes} />
                 </div>
             )}
-
-            <NoteModal
-                key={`${showModal}`}
-                noteToUpdate={noteToUpdate}
-                onConfirm={handlerNotes}
-                showModal={showModal === Modals.NOTES_MODAL}
-                typeModal={typeModal}
-                onClose={() => setShowModal(Modals.NONE)} />
-
-            <YesNoModal
-                showModal={showModal === Modals.YES_NO_MODAL}
-                onYesButtonClick={() => {
-                    deleteNote(noteToDelete!.id);
-                }}
-                onNoButtonClick={() => {
-                    setNoteToDelete(undefined);
-                    setShowModal(Modals.NONE);
-                }}
-            />
-
-
-            {showStatusAnimation &&
-                <StatusAnimation
-                    options={fullscreenAnimationOptions!}
-                    onAnimationCompleted={() => {
-                        setShowStatusAnimation(false)
-                        setFullscreenAnimationOptions({ animation: "", color: "", text: "" });
-                    }} />}
         </>
     );
 }
