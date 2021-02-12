@@ -47,6 +47,24 @@ class NoteBll {
 
         return queryResult;
     }
+
+    async deleteNote(idNote) {
+        const notesDao = new NoteDao();
+
+        const noteByIdResult = await notesDao.noteById(idNote);
+
+        if (!_.isEmpty(noteByIdResult.error)) {
+            throw noteByIdResult.error;
+        }
+
+        const deleteNoteResult = await notesDao.deleteNote(idNote);
+
+        if (!_.isEmpty(deleteNoteResult.error)) {
+            throw deleteNoteResult.error;
+        }
+
+        return noteByIdResult.queryResult;
+    }
 }
 
 module.exports = NoteBll;
