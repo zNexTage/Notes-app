@@ -17,6 +17,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     overflow-y: auto;
+    flex: 1;
 }
 
 @media(max-width: 958px){
