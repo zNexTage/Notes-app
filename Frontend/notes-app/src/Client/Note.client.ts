@@ -6,7 +6,8 @@ import _ from 'lodash';
 type NewNote = {
     noteTitle: string,
     noteContent: string,
-    userId: number
+    userId: number,
+    createdAt?: Date
 }
 
 const GET_NOTES = gql`
@@ -82,10 +83,15 @@ class NoteClient {
         })
     }
 
-    static updateNote(idNote: number, { noteContent, noteTitle, userId }: NewNote) {
+    static updateNote(idNote: number, { noteContent, noteTitle, userId, createdAt }: NewNote) {
         const UPDATE_NOTE = gql` 
-        mutation UpdateNote($idNote:Int!, $title:String!, $content:String!, $idUser:Int!) {
-            UpdateNote(idNote:$idNote, newNote:{title: $title, content: $content, idUser: $idUser}) {
+        mutation UpdateNote($idNote:Int!, $title:String!, $content:String!, $idUser:Int!, $createdAt:Date) {
+            UpdateNote(idNote:$idNote, 
+                newNote:{title: $title, 
+                        content: $content, 
+                        idUser: $idUser, 
+                        createdAt:$createdAt
+                }) {
               id
               title
               content
@@ -100,7 +106,8 @@ class NoteClient {
                     idNote,
                     title: noteTitle,
                     content: noteContent,
-                    idUser: userId
+                    idUser: userId,
+                    createdAt
                 }
             }).then((value) => {
                 const note = value.data.UpdateNote as Note;
