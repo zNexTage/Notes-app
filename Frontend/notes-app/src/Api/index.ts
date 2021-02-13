@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 import { createHttpLink } from "@apollo/client/link/http";
 
-const link = createHttpLink({ uri: "http://192.168.0.12:4000" });
+const link = createHttpLink({ uri: "https://chr-notes-application-backend.herokuapp.com/" });
 
 
 const client = new ApolloClient({
