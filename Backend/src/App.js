@@ -4,9 +4,10 @@ const resolvers = require('./GraphQl/Resolvers');
     
 const server = new ApolloServer({ typeDefs, resolvers, cors: {
     origin: '*',			// <- allow request from all domains
-    credentials: true},	 });
+    credentials: true}
+});
     
-server.listen().then(({ url }) => {
+server.listen({port: process.env.PORT || 4000}).then(({ url }) => {
     console.log(`🚀  Server ready at ${url}`);
 });
 
