@@ -20,11 +20,11 @@ class NoteDao {
                 let query, queryParams;
 
                 if (!_.isEmpty(createdAt)) {
-                    query = "INSERT INTO TB_NOTES (title, content, createdAt) VALUES (?, ?, ?)";
-                    queryParams = [title, content, new Date(createdAt)];
+                    query = "INSERT INTO TB_NOTES (title, content, createdAt, updatedAt) VALUES (?, ?, ?, ?)";
+                    queryParams = [title, content, new Date(createdAt), null];
                 } else {
-                    query = "INSERT INTO TB_NOTES (title, content) VALUES (?, ?)";
-                    queryParams = [title, content];
+                    query = "INSERT INTO TB_NOTES (title, content, updatedAt) VALUES (?, ?, ?)";
+                    queryParams = [title, content, null];
                 }
 
                 connection.query(query, queryParams, (err, result) => {
