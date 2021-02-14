@@ -32,6 +32,7 @@ function UserProfile() {
     const [playAnimation, setPlayAnimation] = useState<boolean>(false);
     const [listNotes, setListNotes] = useState<Array<Note>>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [internalLoading, setInternalLoading] = useState<boolean>(false);
     const [modal, setModal] = useState<ModalHandler>(initialModalState);
     const [showStatusAnimation, setShowStatusAnimation] = useState<boolean>(false);
     const [fullscreenAnimationOptions, setFullscreenAnimationOptions] = useState<FullscreenAnimationOptions>()
@@ -88,7 +89,7 @@ function UserProfile() {
     const createNote = (noteTitle: string, noteContent: string) => {
         const userId = loggedUser!.id;
 
-        setIsLoading(true);
+        setInternalLoading(true);
 
         NoteClient.createNewNote({ noteTitle, noteContent, userId })
             .then((note: Note) => {
@@ -119,7 +120,7 @@ function UserProfile() {
                     text: "Ops! Não foi possível adicionar a sua nota :("
                 });
             }).finally(() => {
-                setIsLoading(false);
+                setInternalLoading(false);
                 setShowStatusAnimation(true);
             });
     }
@@ -216,6 +217,8 @@ function UserProfile() {
                     setModal({ ...initialModalState }); 
                 }}
             />
+
+            <Loading isLoading={internalLoading} />
 
         </>
     );
