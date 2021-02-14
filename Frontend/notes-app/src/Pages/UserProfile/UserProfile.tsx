@@ -110,6 +110,8 @@ function UserProfile() {
                     color: "#5FE378",
                     text: `Sua nota foi adicionada com sucesso!`
                 });
+
+                setModal({ ...initialModalState });
             }).catch(() => {
                 setFullscreenAnimationOptions({
                     animation: ErrorAnimation,
@@ -119,7 +121,6 @@ function UserProfile() {
             }).finally(() => {
                 setIsLoading(false);
                 setShowStatusAnimation(true);
-                setModal({ ...initialModalState });
             });
     }
 
@@ -203,6 +204,7 @@ function UserProfile() {
                     }} />
             }
             <NoteModal
+                key={`createNoteModal___${modal.show}`}
                 showModal={modal.show}
                 whichModal={TypeModal.CREATE}
                 onConfirm={({ note }) => {
