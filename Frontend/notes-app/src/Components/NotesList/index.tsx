@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Button from 'react-bootstrap/esm/Button';
 import { useHistory } from 'react-router-dom';
 import Loading from '../Loading';
 import _ from 'lodash';
@@ -17,6 +16,7 @@ import RemoveNoteAnimation from '../../Assets/remove_note.json';
 import UpdateNoteAnimation from '../../Assets/update_notes.json';
 import ErrorAnimation from '../../Assets/error-animation.json';
 import './style.css';
+import Button from '../Button';
 
 type Props = {
     showTurnBackButton: boolean;
