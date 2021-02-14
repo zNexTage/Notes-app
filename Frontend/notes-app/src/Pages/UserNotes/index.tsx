@@ -15,7 +15,6 @@ function UserNotes() {
     const [loggedUser, setLoggedUser] = useState<User>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [listNotes, setListNotes] = useState<Array<Note>>([]);
-    const [listNotesAux, setListNotesAux] = useState<Array<Note>>([]);
     const [fullscreenAnimationOptions, setFullscreenAnimationOptions] = useState<FullscreenAnimationOptions>();
     const [showStatusAnimation, setShowStatusAnimation] = useState<boolean>(false);
 
@@ -84,10 +83,6 @@ function UserNotes() {
             {showStatusAnimation &&
                 <FullscreenAnimation
                     options={fullscreenAnimationOptions!}
-                    onAnimationStart={() => {
-                        setListNotes([...listNotesAux]);
-                        setListNotesAux([]);
-                    }}
                     onAnimationCompleted={() => {
                         setShowStatusAnimation(false);
                         setFullscreenAnimationOptions({ animation: "", color: "", text: "" });
