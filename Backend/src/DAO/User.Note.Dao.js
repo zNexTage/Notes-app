@@ -22,7 +22,6 @@ class UserNoteDao {
 
                     connection.query(query, [userId, noteId], ((err, results) => {
                         connection.release();
-                        connection.destroy();
 
                         if (!_.isEmpty(err)) {
                             reject({

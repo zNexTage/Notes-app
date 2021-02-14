@@ -28,8 +28,7 @@ class NoteDao {
                 }
 
                 connection.query(query, queryParams, (err, result) => {
-                    connection.release();
-                    connection.destroy(); 
+                    connection.release(); 
 
                     if (err) {
                         console.log("Query error", err);
@@ -73,7 +72,6 @@ class NoteDao {
 
                 connection.query(query, [new Date(), idNote], (err, results) => {
                     connection.release();
-                    connection.destroy(); 
 
                     if (err) {
                         console.log("Query error", err);
@@ -112,6 +110,8 @@ class NoteDao {
                 const query = "SELECT * FROM TB_NOTES WHERE id_note = ?";
 
                 connection.query(query, [idNote], (err, results) => {
+                    connection.release(); 
+
                     if (err) {
                         reject({
                             error: "Não foi possível obter a nota",
@@ -148,6 +148,8 @@ class NoteDao {
                 `;
 
                 con.query(query, [userId], (err, notes) => {
+                    con.release(); 
+                    
                     if (err) {
                         reject({
                             error: "Não foi possível obter as notas do usuário",

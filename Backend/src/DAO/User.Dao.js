@@ -20,7 +20,6 @@ class UserDao {
 
                     connection.query(query, [username], (err, result) => {
                         connection.release();
-                        connection.destroy();
 
                         if (err) {
                             console.log("Query error", err);
