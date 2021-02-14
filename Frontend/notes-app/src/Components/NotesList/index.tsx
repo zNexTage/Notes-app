@@ -22,7 +22,7 @@ type Props = {
     showTurnBackButton: boolean;
     principalContainerId?: string;
     listNotes: Array<Note>;
-    onUpdateNoteRequestFinish: (noteToUpdate:Note, updatedNote: Note) => void;
+    onUpdateNoteRequestFinish: (noteToUpdate: Note, updatedNote: Note) => void;
     onDeleteNoteRequestFinish: (deletedNote: Note) => void;
 }
 
@@ -110,7 +110,7 @@ function NotesList({ showTurnBackButton, principalContainerId, listNotes, onUpda
     const deleteNote = (idNote: number) => {
         setIsLoading(true);
 
-        NoteClient.deleteNote(idNote).then((deletedNote) => { 
+        NoteClient.deleteNote(idNote).then((deletedNote) => {
             setFullscreenAnimationOptions({
                 animation: RemoveNoteAnimation,
                 color: "#5FE378",
@@ -135,75 +135,74 @@ function NotesList({ showTurnBackButton, principalContainerId, listNotes, onUpda
 
     return (
         <>
-            {isLoading && <Loading isLoading={isLoading} />}
-            {!isLoading && (
-                <div id={principalContainerId} className="user-notes-container">
-                    {showTurnBackButton &&
-                        <Button
-                            onClick={() => history.goBack()}
-                            title="Voltar"
-                            color="#C055C9" />
-                    }
 
-                    <div className="notes-container">
-                        <>
-                            {!_.isEmpty(listNotes) && listNotes.map((note: Note) => (
-                                <NoteCard
-                                    onRemoveButtonClick={() => {
-                                        setNoteToDelete(note);
-                                        const modalConfig = {
-                                            modalType: TypeModal.YES_NO,
-                                            show: true
-                                        }
+            <div id={principalContainerId} className="user-notes-container">
+                {showTurnBackButton &&
+                    <Button
+                        onClick={() => history.goBack()}
+                        title="Voltar"
+                        color="#C055C9" />
+                }
 
-                                        setModalHandler({ ...modalConfig });
-                                    }}
-                                    onUpdateButtonClick={() => {
-                                        const modalConfig = {
-                                            modalType: TypeModal.UPDATE,
-                                            show: true
-                                        }
+                <div className="notes-container">
+                    <>
+                        {!_.isEmpty(listNotes) && listNotes.map((note: Note) => (
+                            <NoteCard
+                                onRemoveButtonClick={() => {
+                                    setNoteToDelete(note);
+                                    const modalConfig = {
+                                        modalType: TypeModal.YES_NO,
+                                        show: true
+                                    }
 
-                                        setNoteToUpdate(note);
-
-                                        setModalHandler({ ...modalConfig });
-                                    }}
-                                    key={`notecard___${note.id}`}
-                                    note={note} />
-                            ))}
-                            {_.isEmpty(listNotes) &&
-                                <NoNotesRegistered animationWidth="70%" />
-                            }
-
-                            <NoteModal
-                                key={`${modalHandler.modalType}`}
-                                note={noteToUpdate}
-                                whichModal={modalHandler.modalType}
-                                onConfirm={({ note }) => {
-                                    handlerNotes(note, ActionNotes.UPDATE_NOTE);
+                                    setModalHandler({ ...modalConfig });
                                 }}
-                                showModal={modalHandler.modalType === TypeModal.UPDATE}
-                                onClose={() => {
-                                    setNoteToUpdate(undefined);
-                                    setModalHandler({ ...initalStateModal });
-                                }} />
+                                onUpdateButtonClick={() => {
+                                    const modalConfig = {
+                                        modalType: TypeModal.UPDATE,
+                                        show: true
+                                    }
 
-                            <YesNoModal
-                                showModal={modalHandler.modalType === TypeModal.YES_NO}
-                                onYesButtonClick={() => {
-                                    handlerNotes(noteToDelete!, ActionNotes.DELETE_NOTE);
+                                    setNoteToUpdate(note);
+
+                                    setModalHandler({ ...modalConfig });
                                 }}
-                                onNoButtonClick={() => {
-                                    setNoteToDelete(undefined);
-                                    setModalHandler({ ...initalStateModal });
-                                }}
-                            />
+                                key={`notecard___${note.id}`}
+                                note={note} />
+                        ))}
+                        {_.isEmpty(listNotes) &&
+                            <NoNotesRegistered animationWidth="70%" />
+                        }
 
-                        </>
+                        <NoteModal
+                            key={`${modalHandler.modalType}`}
+                            note={noteToUpdate}
+                            whichModal={modalHandler.modalType}
+                            onConfirm={({ note }) => {
+                                handlerNotes(note, ActionNotes.UPDATE_NOTE);
+                            }}
+                            showModal={modalHandler.modalType === TypeModal.UPDATE}
+                            onClose={() => {
+                                setNoteToUpdate(undefined);
+                                setModalHandler({ ...initalStateModal });
+                            }} />
 
-                    </div>
+                        <YesNoModal
+                            showModal={modalHandler.modalType === TypeModal.YES_NO}
+                            onYesButtonClick={() => {
+                                handlerNotes(noteToDelete!, ActionNotes.DELETE_NOTE);
+                            }}
+                            onNoButtonClick={() => {
+                                setNoteToDelete(undefined);
+                                setModalHandler({ ...initalStateModal });
+                            }}
+                        />
+
+                    </>
+
                 </div>
-            )}
+            </div>
+
 
             {showStatusAnimation &&
                 <FullscreenAnimation
@@ -212,6 +211,8 @@ function NotesList({ showTurnBackButton, principalContainerId, listNotes, onUpda
                         setShowStatusAnimation(false);
                         setFullscreenAnimationOptions({ animation: "", color: "", text: "" });
                     }} />}
+
+            <Loading isLoading={isLoading} />
         </>
     )
 }
