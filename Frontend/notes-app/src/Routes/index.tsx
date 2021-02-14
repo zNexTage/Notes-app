@@ -16,7 +16,7 @@ function Routes() {
                     <UserProfile />
                 </Route>
                 <Route path="/usernotes">
-                    <UserNotes showTurnBackButton={true} />
+                    <UserNotes />
                 </Route>
                 <Route path="/error">
                     <ErrorPage />
