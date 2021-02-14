@@ -94,7 +94,12 @@ function NoteModal({ showModal, onClose, onConfirm, whichModal, note }: Props) {
                     color="#49E367" />
 
                 <Button
-                    onClick={onClose}
+                    onClick={() => {
+                        setNoteTitle("");
+                        setNoteContent("");
+
+                        onClose && onClose();
+                    }}
                     title="Sair :|"
                     color="#E35F73" />
             </Modal.Footer>
