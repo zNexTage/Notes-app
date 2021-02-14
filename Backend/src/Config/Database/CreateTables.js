@@ -17,7 +17,7 @@ const TbNotes = dedent(`CREATE TABLE IF NOT EXISTS TB_NOTES (
     title VARCHAR(50) NOT NULL,
     content TEXT NOT NULL,
     createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP
+    updatedAt TIMESTAMP NULL
 );
 `);
 
