@@ -8,8 +8,8 @@ import { TypeModal } from '../Types';
 
 type Props = {
     showModal: boolean
-    onClose: () => void;
-    onConfirm: ({ note, isNewNote }: { note: Note, isNewNote: boolean }) => void;
+    onClose?: () => void;
+    onConfirm?: ({ note, isNewNote }: { note: Note, isNewNote: boolean }) => void;
     whichModal: TypeModal;
     note?: Note;
 }
@@ -85,7 +85,7 @@ function NoteModal({ showModal, onClose, onConfirm, whichModal, note }: Props) {
                             noteToMutate.createdAt = note!.createdAt;
                         }
 
-                        onConfirm({
+                        onConfirm && onConfirm({
                             note: noteToMutate,
                             isNewNote
                         });
